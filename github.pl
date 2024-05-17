@@ -50,5 +50,5 @@ sub download_resources {
         unlink 'json'; # Remove the temporary JSON file
     }
 }
-
+cpan install LWP::UserAgent JSON
 download_resources();

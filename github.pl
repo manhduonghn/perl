@@ -37,8 +37,12 @@ sub download_resources {
 
         my $release_data = decode_json($content);
         for my $asset (@{$release_data->{assets}}) {
-            my $download_url = $asset->{browser_download_url};
             my $asset_name = $asset->{name};
+            
+            # Skip files with .asc extension
+            next if $asset_name =~ /\.asc$/;
+
+            my $download_url = $asset->{browser_download_url};
             req($download_url, $asset_name);
         }
 

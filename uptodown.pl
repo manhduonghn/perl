@@ -128,4 +128,4 @@ sub uptodown {
     req($final_url, $apk_filename);
 }
 
-uptodown('youtube', 'com.google.android.youtube');
+uptodown('youtube-music', 'com.google.android.apps.youtube.music');

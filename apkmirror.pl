@@ -57,7 +57,6 @@ sub apkmirror {
             my $version = $2;
             push @versions, $version if $count <= 20 && $line !~ /alpha|beta/i;
             $count++;
-            $versions =~ s/\W*$//;
         }
     }
 

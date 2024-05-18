@@ -51,13 +51,19 @@ sub apkmirror {
     close $file_handle;
 
     my $count = 0;
+    my @versions;
     for my $line (@lines) {
         if ($line =~ /fontBlack(.*?)>(.*?)<\/a>/) {
-            my $versions = $2;
+            my $version = $2;
+            push @versions, $version if $count <= 20 && $line !~ /alpha|beta/i;
             $count++;
-            print "$versions\n" if $count <= 20 && $line !~ /alpha|beta/i;
         }
     }
+
+    # Print or process the collected versions
+    print join("\n", @versions) . "\n";
+
+    unlink $tempfile;
     exit 0;
 
     # The following code is commented out since the exit statement above will prevent it from being executed.

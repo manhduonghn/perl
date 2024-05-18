@@ -81,7 +81,7 @@ sub uptodown {
         my @lines = <$file_handle>;
         close $file_handle;
 
-        # my @version;
+        my @version;
         for my $line (@lines) {
             if ($line =~ /.*class="version">(.*?)<\/div>/) {
                 $version = $1;

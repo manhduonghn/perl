@@ -81,14 +81,13 @@ sub uptodown {
         my @lines = <$file_handle>;
         close $file_handle;
 
-        my @latest_version;
+        mv @version;
         for my $line (@lines) {
             if ($line =~ /.*class="version">(.*?)<\/div>/) {
-                my $latest_version = $1;
-                print "$latest_version\n";
+                my $version = $1;
+                print "$version\n";
             }
         }
-        $version = $latest_version;
         unlink $tempfile;
     }
 

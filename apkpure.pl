@@ -113,4 +113,4 @@ sub apkpure {
     req($download_url, $apk_filename);
 }
 
-uptodown('youtube-music', 'com.google.android.apps.youtube.music');
+apkpure('youtube-music', 'com.google.android.apps.youtube.music');

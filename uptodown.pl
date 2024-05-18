@@ -119,7 +119,7 @@ sub uptodown {
     close $fh;
     
     my $final_url;
-    my $i = 0;
+    # my $i = 0;
     for my $line (@lines) {
         if ($line =~ /.*"post-download" data-url="([^"]*)"/ && ++$i == 1) {
             $final_url = "https://dw.uptodown.com/dwn/$1";

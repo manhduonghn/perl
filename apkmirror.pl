@@ -73,6 +73,7 @@ sub get_supported_version {
 
     # Sort versions in reverse order and get the latest version
     my $latest_version = (sort {$b cmp $a} keys %versions)[0];
+    return $latest_version;
 }
 
 sub apkmirror {

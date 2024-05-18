@@ -35,11 +35,33 @@ sub filter_lines {
     }
 }
 
+sub get_supported_version {
+    my $pkg_name = shift;
+    my $filename = 'patches.json';
+    
+    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+
+    my $json_text = do { local $/; <$fh> };
+    close($fh);
+
+    my $data = decode_json($json_text);
+    
+    my $max_version;
+    foreach my $obj (@{$data}) {
+        if ($obj->{name} eq $pkg_name && $obj->{versions}) {
+            $max_version = $obj->{versions}->[-1];
+            last;
+        }
+    }
+
+    return $max_version;
+}
+
 sub apkmirror {
     my ($org, $name, $package, $arch, $dpi) = @_;
     $dpi ||= 'nodpi';
     $arch ||= 'universal';
-    my $version = '19.11.43';
+    my $version = get_supported_version($package);
     
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
 
@@ -114,9 +136,9 @@ sub apkmirror {
     unlink $tempfile;
     
     # Final download
-    my $apk_filename = "$name-v19.11.43.apk";
+    my $apk_filename = "youtube-v19.11.43.apk";
     req($final_url, $apk_filename);
 }
 
 # Execute the apkmirror subroutine
-apkmirror('google-inc', 'youtube', 'com.android.google.youtube');
+apkmirror('google-inc', 'youtube', 'com.google.android.youtube');

@@ -28,4 +28,5 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: |
+          perl github.pl 
           perl apkmirror.pl 

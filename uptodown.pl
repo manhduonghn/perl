@@ -83,7 +83,7 @@ sub uptodown {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /class="version">(.*?)<\/div>/) {
+            if ($line =~ /.*class="version">(.*?)</) {
                 my $version = $1;
             }
         }

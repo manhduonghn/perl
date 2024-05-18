@@ -20,6 +20,19 @@ sub req {
         or die "Failed to execute $command: $?";
 }
 
+# Function to filter lines based on pattern and buffer size
+sub filter_lines {
+    my ($pattern, $size, $buffer_ref) = @_;
+    my @temp_buffer;
+    for my $line (@$buffer_ref) {
+        push @temp_buffer, $line;
+        if ($line =~ /$pattern/) {
+            @$buffer_ref = @temp_buffer[-$size..-1] if @temp_buffer > $size;
+            return;
+        }
+    }
+}
+
 sub apkmirror {
     my $version = "19.11.43";  # Corrected missing semicolon
     my $url = "https://www.apkmirror.com/apk/google-inc/youtube/youtube-" . (join '-', split /\./, $version) . "-release";
@@ -34,7 +47,27 @@ sub apkmirror {
     open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
     my $content = do { local $/; <$file> };
     close $file;
-    
+
+    # Step 1: Filter by dpi
+    filter_lines(qr/>\s*nodpi\s*</, 16, \@lines);
+
+    # Step 2: Filter by arch
+    filter_lines(qr/>\s*universal\s*</, 14, \@lines);
+
+    # Step 3: Filter by APK
+    filter_lines(qr/>\s*APK\s*</, 6, \@lines);
+
+    # Extract the download page URL
+    my $download_page_url;
+    my $i = 0;
+    for my $line (@lines) {
+        if ($line =~ /.*href="(.*apk-[^"]*)".*/ && ++$i == 1) {
+            $download_page_url = "https://www.apkmirror.com$1";
+            last;
+        }
+    }
+
+    print $download_page_url
 }
 
 # Execute the apkmirror subroutine

@@ -71,7 +71,7 @@ sub apkpure {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /ver-top-down(.*?)data-dt-version="(.*?)"/) {
+            if ($line =~ /"ver-top-down"(.*?)data-dt-version="(.*?)"/) {
                 $version = "$2";
             }
         }
@@ -100,4 +100,4 @@ sub apkpure {
     req($download_url, $apk_filename);
 }
 
-apkpure('youtube-music', 'com.google.android.apps.youtube.music');
+apkpure('youtube', 'com.google.android.youtube');

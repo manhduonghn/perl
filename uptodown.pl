@@ -102,9 +102,8 @@ sub uptodown {
     filter_lines(qr/>\s*$version\s*<\/span>/, 5, \@lines);
     
     my $download_page_url;
-    my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*data-url="(.*[^"]*)"/ && ++$i == 1) {
+        if ($line =~ /.*data-url="(.*[^"]*)"/) {
             $download_page_url = "$1";
             $download_page_url =~ s/\/download\//\/post-download\//g;
             last;
@@ -119,9 +118,8 @@ sub uptodown {
     close $fh;
     
     my $final_url;
-    # my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*"post-download" data-url="([^"]*)"/ && ++$i == 1) {
+        if ($line =~ /.*"post-download" data-url="([^"]*)"/) {
             $final_url = "https://dw.uptodown.com/dwn/$1";
             last;
         }

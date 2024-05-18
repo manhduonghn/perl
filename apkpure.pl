@@ -21,18 +21,6 @@ sub req {
         or die "Failed to execute $command: $?";
 }
 
-sub filter_lines {
-    my ($pattern, $size, $buffer_ref) = @_;
-    my @temp_buffer;
-    for my $line (@$buffer_ref) {
-        push @temp_buffer, $line;
-        if ($line =~ /$pattern/) {
-            @$buffer_ref = @temp_buffer[-$size..-1] if @temp_buffer > $size;
-            return;
-        }
-    }
-}
-
 sub get_supported_version {
     my $pkg_name = shift;
     my $filename = 'patches.json';

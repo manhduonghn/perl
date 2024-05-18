@@ -127,6 +127,7 @@ sub apkmirror {
     close $fh;
 
     my $dl_apk_url;
+    my $i = 0;
     for my $line (@lines) {
         if ($line =~ /href="([^"]*key=[^"]*)"/ && ++$i == 1) {
             $dl_apk_url = "https://www.apkmirror.com$1";
@@ -142,6 +143,7 @@ sub apkmirror {
     close $fh;
     
     my $final_url;
+    my $i = 0;
     for my $line (@lines) {
         if ($line =~ /href="([^"]*key=[^"]*)"/ && ++$i == 1) {
             $final_url = "https://www.apkmirror.com$1";

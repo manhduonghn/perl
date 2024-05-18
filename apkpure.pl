@@ -99,4 +99,6 @@ sub apkpure {
     req($download_url, $apk_filename);
 }
 
-apkpure('youtube-music', 'com.google.android.apps.youtube.music');
+# Main script 
+my ($name, $package) = @ARGV;
+apkpure($name, $package);

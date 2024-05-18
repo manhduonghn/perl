@@ -75,6 +75,7 @@ sub apkpure {
                 $version = "$1";
             }
         }
+        print "$version\n" if $version;
         unlink $tempfile;
     }
 

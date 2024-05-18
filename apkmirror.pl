@@ -67,6 +67,8 @@ sub apkmirror {
         }
     }
 
+    unlink $tempfile;
+    
     # Fetch the download page and store the output in the temporary file
     req($download_page_url, $tempfile);
 
@@ -84,6 +86,8 @@ sub apkmirror {
         }
     }
 
+    unlink $tempfile;
+    
     req($dl_apk_url, $tempfile);
 
     # Read the temporary file content again
@@ -101,6 +105,8 @@ sub apkmirror {
         }
     }
 
+    unlink $tempfile;
+    
     # Final download
     my $apk_filename = "youtube-vlin11.43.apk";
     req($final_url, $apk_filename);

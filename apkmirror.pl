@@ -117,16 +117,13 @@ sub apkmirror {
 
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
 
-    # Create a temporary file to store the output
-    my ($fh, $tempfile) = tempfile();
-
     # Fetch the URL and store the output in the temporary file
     req($url, $tempfile);
 
     # Read the temporary file content line by line
-    open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    my @lines = <$file>;
-    close $file;
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    my @lines = <$fh>;
+    close $fh;
 
     # Step 1: Filter by dpi
     filter_lines(qr/>\s*$dpi\s*</, 16, \@lines);
@@ -153,9 +150,9 @@ sub apkmirror {
     req($download_page_url, $tempfile);
 
     # Read the temporary file content again
-    open $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    @lines = <$file>;
-    close $file;
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$fh>;
+    close $fh;
 
     # Extract final APK download URL from the content
     my $dl_apk_url;
@@ -171,9 +168,9 @@ sub apkmirror {
     req($dl_apk_url, $tempfile);
 
     # Read the temporary file content again
-    open $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    @lines = <$file>;
-    close $file;
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$fh>;
+    close $fh;
 
     # Extract final APK download URL from the content
     my $final_url;

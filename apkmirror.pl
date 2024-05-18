@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use JSON;
-use version;
 use File::Temp qw(tempfile);
 
 sub req {
@@ -20,11 +19,6 @@ sub req {
     my $command = "wget $headers --keep-session-cookies --timeout=30 -nv -O \"$output\" \"$url\"";
     system($command) == 0
         or die "Failed to execute $command: $?";
-}
-
-sub compare_versions {
-    my ($a, $b) = @_;
-    return version->parse($a) <=> version->parse($b);
 }
 
 # Function to filter lines based on pattern and buffer size
@@ -63,21 +57,13 @@ sub apkmirror {
             my $version = $2;
             push @versions, $version if $count <= 20 && $line !~ /alpha|beta/i;
             $count++;
+            $versions =~ s/\W*$//;
         }
     }
 
-    my %seen;
-    my $max_version;
-    for my $version (@versions) {
-        while (/\b(\d+(\.\d+)+(?:\-\w+)?(?:\.\d+)?(?:\.\w+)?)\b/gi) {
-            my $version = $1;
-            next if $seen{$version}++;
-            $max_version = $version if not defined $max_version or compare_versions($version, $max_version) > 0;
-        }
-    }
-    if ($max_version) {
-        print "$max_version\n";
-    }
+    # Print or process the collected versions
+    print join("\n", @versions) . "\n";
+
     unlink $tempfile;
     exit 0;
 

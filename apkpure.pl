@@ -79,7 +79,7 @@ sub apkpure {
         unlink $tempfile;
     }
 
-    my $url = "https://apkpure.net/$name/$package/versions";
+    my $url = "https://apkpure.net/$name/$package/download/$version";
     req($url, $tempfile);
 
     open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";

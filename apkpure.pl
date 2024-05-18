@@ -86,9 +86,8 @@ sub apkpure {
     close $fh;
     
     my $download_url;
-    my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*href="(.*\/APK\/$package[^"]*)".*/ && ++$i == 1) {
+        if ($line =~ /.*href="(.*\/APK\/$package[^"]*)".*/) {
             $download_url = "$1";
             last;
         }

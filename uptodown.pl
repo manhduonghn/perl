@@ -88,6 +88,7 @@ sub uptodown {
                 print "$version\n";
             }
         }
+        $version = $version[0];
         unlink $tempfile;
     }
 

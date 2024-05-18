@@ -43,9 +43,9 @@ sub apkmirror {
     # Fetch the URL and store the output in the temporary file
     req($url, $tempfile);
 
-    # Read the temporary file content
+    # Read the temporary file content line by line
     open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    my $content = do { local $/; <$file> };
+    my @lines = <$file>;
     close $file;
 
     # Step 1: Filter by dpi
@@ -61,13 +61,13 @@ sub apkmirror {
     my $download_page_url;
     my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*href="(.*apk-[^"]*)".*/ && ++$i == 1) {
+        if ($line =~ /.*href="(\/apk\/google-inc\/youtube\/[^"]*\/download\/)".*/ && ++$i == 1) {
             $download_page_url = "https://www.apkmirror.com$1";
             last;
         }
     }
 
-    print $download_page_url
+    print "$download_page_url\n";
 }
 
 # Execute the apkmirror subroutine

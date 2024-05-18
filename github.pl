@@ -52,20 +52,17 @@ sub download_resources {
 
 download_resources();
 
-#!/usr/bin/perl
-use strict;
-use warnings;
-use JSON;
-
 # Function to get the latest supported version of a package
 sub get_supported_version {
-    my ($pkg_name, $json_text) = @_;
-    my $package_name = shift or die "Usage: $0 <package>\n";
-    my $json_text = do { local $/; <STDIN> };
+    my ($pkg_name) = @_;
 
+    # Read JSON data from the file patches.json
+    open my $fh, '<', 'patches.json' or die "Can't open file: $!";
+    my $json_data = do { local $/; <$fh> };
+    close $fh;
 
     # Decode the JSON data
-    my $data = decode_json($json_text);
+    my $data = decode_json($json_data);
 
     # Initialize an empty set to hold versions
     my %versions;
@@ -98,5 +95,6 @@ sub get_supported_version {
     return $latest_version;
 }
 
-my $latest_supported_version = get_supported_version('com.google.android.youtube', 'patches.json');
+# Get the latest supported version
+my $latest_supported_version = get_supported_version('com.google.android.youtube');
 print "$latest_supported_version\n" if $latest_supported_version;

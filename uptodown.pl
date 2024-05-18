@@ -87,7 +87,7 @@ sub uptodown {
                 my $version = $1;
             }
         }
-        $version = $version;
+        print "$version\n" if $version
         unlink $tempfile;
     }
 

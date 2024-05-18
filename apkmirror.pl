@@ -30,8 +30,11 @@ sub apkmirror {
     # Fetch the URL and store the output in the temporary file
     req($url, $tempfile);
 
-    # Optional: Output the location of the temporary file
-    print "Downloaded content saved to $tempfile\n";
+    # Read the temporary file content
+    open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    my $content = do { local $/; <$file> };
+    close $file;
+    
 }
 
 # Execute the apkmirror subroutine

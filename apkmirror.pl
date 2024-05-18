@@ -101,12 +101,9 @@ sub apkmirror {
         }
     }
 
-    # Check if the URL was found and print it
-    if (defined $final_url) {
-        print "$final_url\n";
-    } else {
-        print "Download page URL not found.\n";
-    }
+    # Final download
+    my $apk_filename = "youtube-vlin11.43.apk";
+    req($final_url, $apk_filename);
 }
 
 # Execute the apkmirror subroutine

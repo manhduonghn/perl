@@ -99,5 +99,5 @@ sub get_supported_version {
 my $package_name = shift or die "Usage: $0 <package>\n";
 my $json_text = do { local $/; <STDIN> };
 
-my $latest_supported_version = get_supported_version($package_name, 'patches.json');
+my $latest_supported_version = get_supported_version('com.google.android.youtube', 'patches.json');
 print "$latest_supported_version\n" if $latest_supported_version;

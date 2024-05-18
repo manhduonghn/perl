@@ -35,48 +35,6 @@ sub filter_lines {
     }
 }
 
-sub get_supported_version {
-    my $pkg_name = shift;
-    my $filename = 'patches.json';
-    
-    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
-    local $/;  # Slurp mode
-    my $json_text = <$fh>;
-    close($fh);
-
-    my $data = decode_json($json_text);
-    
-    # Initialize an empty set to hold versions
-    my %versions;
-
-    # Iterate over each patch in the JSON data
-    foreach my $patch (@{$data}) {
-        my $compatible_packages = $patch->{'compatiblePackages'};
-    
-        # Check if compatiblePackages is a non-empty list
-        if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
-            # Iterate over each package in compatiblePackages
-            foreach my $package (@$compatible_packages) {
-                # Check if package name and versions list is not empty
-                if (
-                    $package->{'name'} eq $pkg_name &&
-                    $package->{'versions'} && ref($package->{'versions'}) eq 'ARRAY' && @{$package->{'versions'}}
-                ) {
-                    # Add versions to the set
-                    foreach my $version (@{$package->{'versions'}}) {
-                        $versions{$version} = 1;
-                    }
-                }
-            }
-        }
-    }
-
-    # Sort versions in reverse order and get the latest version
-    my $version = (sort {$b cmp $a} keys %versions)[0];
-
-    return $version;
-}
-
 sub apkmirror {
     my ($org, $name, $package, $arch, $dpi) = @_;
     $dpi ||= 'nodpi';
@@ -85,7 +43,6 @@ sub apkmirror {
     # Create a temporary file to store the output
     my ($fh, $tempfile) = tempfile();
     
-    # my $version = get_supported_version($package);
     my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
     req($page, $tempfile);
     
@@ -102,7 +59,6 @@ sub apkmirror {
             print "$versions\n" if $count <= 20 && $line !~ /alpha|beta/i;
         }
     }
-    print "$versions\n"
     exit 0;
     
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";

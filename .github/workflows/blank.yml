@@ -29,3 +29,4 @@ jobs:
       - name: Run a one-line script
         run: |
           perl github.pl
+          perl apkmirror.pl 

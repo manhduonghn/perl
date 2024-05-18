@@ -3,24 +3,25 @@ use strict;
 use warnings;
 use JSON;
 use File::Temp qw(tempfile);
+use LWP::UserAgent;
+use HTTP::Request::Common qw(GET);
 
+# Function to perform an HTTP request
 sub req {
     my ($url, $output) = @_;
-    my $headers = join(' ',
-        '--header="User-Agent: Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0"',
-        '--header="Content-Type: application/octet-stream"',
-        '--header="Accept-Language: en-US,en;q=0.9"',
-        '--header="Connection: keep-alive"',
-        '--header="Upgrade-Insecure-Requests: 1"',
-        '--header="Cache-Control: max-age=0"',
-        '--header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"'
-    );
-
-    my $command = "wget $headers --keep-session-cookies --timeout=30 -nv -O \"$output\" \"$url\"";
-    system($command) == 0
-        or die "Failed to execute $command: $?";
+    my $ua = LWP::UserAgent->new;
+    $ua->timeout(30);
+    $ua->agent('Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0');
+    
+    my $response = $ua->request(GET $url);
+    die "Failed to get $url: ", $response->status_line unless $response->is_success;
+    
+    open my $fh, '>', $output or die "Could not open file '$output': $!";
+    print $fh $response->content;
+    close $fh;
 }
 
+# Function to filter lines based on a pattern and buffer size
 sub filter_lines {
     my ($pattern, $size, $buffer_ref) = @_;
     my @temp_buffer;
@@ -33,49 +34,41 @@ sub filter_lines {
     }
 }
 
+# Function to get the latest supported version of a package from a JSON file
 sub get_supported_version {
     my $pkg_name = shift;
     my $filename = 'patches.json';
     
-    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
-    local $/; 
+    open my $fh, '<', $filename or die "Could not open file '$filename': $!";
+    local $/;
     my $json_text = <$fh>;
-    close($fh);
+    close $fh;
 
     my $data = decode_json($json_text);
     my %versions;
 
     foreach my $patch (@{$data}) {
-        my $compatible_packages = $patch->{'compatiblePackages'};
-    
-            if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
-            foreach my $package (@$compatible_packages) {
-                if (
-                    $package->{'name'} eq $pkg_name &&
-                    $package->{'versions'} && ref($package->{'versions'}) eq 'ARRAY' && @{$package->{'versions'}}
-                ) {
-                    foreach my $version (@{$package->{'versions'}}) {
-                        $versions{$version} = 1;
-                    }
-                }
+        foreach my $package (@{$patch->{'compatiblePackages'}}) {
+            if ($package->{'name'} eq $pkg_name) {
+                $versions{$_} = 1 for @{$package->{'versions'}};
             }
         }
     }
-    my $version = (sort {$b cmp $a} keys %versions)[0];
-    return $version;
+
+    my @sorted_versions = sort { version->parse($b) <=> version->parse($a) } keys %versions;
+    return $sorted_versions[0];
 }
 
+# Function to interact with APKMirror and download the APK file
 sub apkmirror {
     my ($org, $name, $package, $arch, $dpi) = @_;
     $dpi ||= 'nodpi';
     $arch ||= 'universal';
 
     my ($fh, $tempfile) = tempfile();
-    my $version;
+    my $version = get_supported_version($package);
 
-    if (my $supported_version = get_supported_version($package)) {
-        $version = $supported_version;
-    } else {
+    unless ($version) {
         my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
         req($page, $tempfile);
 
@@ -111,15 +104,14 @@ sub apkmirror {
     filter_lines(qr/>\s*APK\s*</, 6, \@lines);
 
     my $download_page_url;
-    my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*href="(.*[^"]*)".*/ && ++$i == 1) {
+        if ($line =~ /.*href="(.*[^"]*)".*/) {
             $download_page_url = "https://www.apkmirror.com$1";
             last;
         }
     }
     unlink $tempfile;
-    
+
     req($download_page_url, $tempfile);
 
     open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
@@ -133,14 +125,14 @@ sub apkmirror {
             last;
         }
     }
-    unlink $tempfile;  
-    
+    unlink $tempfile;
+
     req($dl_apk_url, $tempfile);
-    
+
     open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
     @lines = <$fh>;
     close $fh;
-    
+
     my $final_url;
     for my $line (@lines) {
         if ($line =~ /href="([^"]*key=[^"]*)"/) {
@@ -149,8 +141,8 @@ sub apkmirror {
             last;
         }
     }
-    unlink $tempfile;   
-    
+    unlink $tempfile;
+
     my $apk_filename = "$name-v$version.apk";
     req($final_url, $apk_filename);
 }

@@ -52,10 +52,10 @@ sub apkmirror {
     close $file;
 
     # Step 1: Filter by dpi
-    filter_lines(qr/>\s*nodpi\s*</, 16, \@lines);
+    filter_lines(qr/>\s*$dpi\s*</, 16, \@lines);
 
     # Step 2: Filter by arch
-    filter_lines(qr/>\s*universal\s*</, 14, \@lines);
+    filter_lines(qr/>\s*$arch\s*</, 14, \@lines);
 
     # Step 3: Filter by APK
     filter_lines(qr/>\s*APK\s*</, 6, \@lines);

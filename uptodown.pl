@@ -85,7 +85,7 @@ sub uptodown {
         for my $line (@lines) {
             if ($line =~ /.*class="version">(.*?)<\/div>/) {
                 my $latest_version = $1;
-                last;
+                print "$latest_version\n";
             }
         }
         $version = $latest_version;

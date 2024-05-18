@@ -71,7 +71,7 @@ sub apkpure {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /data-dt-version="(.*?)"/) {
+            if ($line =~ /data-dt-version="(.*?)" data-dt-versioncode/) {
                 $version = "$1";
             }
         }

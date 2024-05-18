@@ -84,32 +84,36 @@ sub apkmirror {
     # Create a temporary file to store the output
     my ($fh, $tempfile) = tempfile();
 
-    my $version = get_supported_version($package);
-    
-    my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
-    req($page, $tempfile);
+    my $version;
 
-    # Read the temporary file content line by line
-    open my $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    my @lines = <$file_handle>;
-    close $file_handle;
+    if (my $supported_version = get_supported_version($package)) {
+        $version = $supported_version;
+    } else {
+        my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
+        req($page, $tempfile);
 
-    my $count = 0;
-    my @versions;
-    for my $line (@lines) {
-        if ($line =~ /fontBlack(.*?)>(.*?)<\/a>/) {
-            my $version = $2;
-            push @versions, $version if $count <= 20 && $line !~ /alpha|beta/i;
-            $count++;
+        # Read the temporary file content line by line
+        open my $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
+        my @lines = <$file_handle>;
+        close $file_handle;
+
+        my $count = 0;
+        my @versions;
+        for my $line (@lines) {
+            if ($line =~ /fontBlack(.*?)>(.*?)<\/a>/) {
+                my $version = $2;
+                push @versions, $version if $count <= 20 && $line !~ /alpha|beta/i;
+                $count++;
+            }
         }
+
+        @versions = map { s/^\D+//; $_ } @versions;
+        @versions = sort { version->parse($b) <=> version->parse($a) } @versions;
+
+        $version = $versions[0];
+
+        unlink $tempfile;
     }
-
-    @versions = map { s/^\D+//; $_ } @versions;
-    @versions = sort { version->parse($b) <=> version->parse($a) } @versions;
-
-    my $version = $versions[0];
-
-    unlink $tempfile;
 
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
 

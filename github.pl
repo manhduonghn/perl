@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use JSON;
+use version;
 use File::Temp qw(tempfile);
 
 sub req {

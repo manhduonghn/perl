@@ -92,7 +92,7 @@ sub apkpure {
             last;
         }
     }
-    print "$download_url\n" if $download_url
+    print "$download_url\n" if $download_url;
     unlink $tempfile;   
     
     my $apk_filename = "$name-v$version.apk";

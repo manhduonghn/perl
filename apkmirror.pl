@@ -86,7 +86,9 @@ sub apkmirror {
     my ($fh, $tempfile) = tempfile();
     
     # my $version = get_supported_version($package);
-    my $url = "https://www.apkmirror.com/uploads/?appcategory=$name";
+    my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
+    req($page, $tempfile);
+    
     # Read the temporary file content line by line
     open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
     my @lines = <$file>;
@@ -100,6 +102,7 @@ sub apkmirror {
             print "$versions\n" if $count <= 20 && $line !~ /alpha|beta/i;
         }
     }
+    print "$versions\n"
     exit 0;
     
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";

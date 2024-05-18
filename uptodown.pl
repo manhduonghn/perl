@@ -132,4 +132,6 @@ sub uptodown {
     req($final_url, $apk_filename);
 }
 
-uptodown('youtube-music', 'com.google.android.apps.youtube.music');
+# Main script 
+my ($name, $package) = @ARGV;
+uptodown($name, $package);

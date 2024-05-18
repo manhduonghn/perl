@@ -38,13 +38,13 @@ sub apkmirror {
     $dpi ||= 'nodpi';
     $arch ||= 'universal';
     my $version = "19.11.43";  
-    my $apkmirror_url= "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
+    my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
 
     # Create a temporary file to store the output
     my ($fh, $tempfile) = tempfile();
 
     # Fetch the URL and store the output in the temporary file
-    req($apkmirror_url, $tempfile);
+    req($url, $tempfile);
 
     # Read the temporary file content line by line
     open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";

@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use File::Temp qw(tempfile);
-use File::Slurp;
 
 
 sub req {
@@ -37,7 +36,13 @@ sub filter_lines {
 
 sub get_supported_version {
     my $pkg_name = shift;
-    my $json_text = read_file('patches.json');
+    my $filename = 'patches.json';
+    
+    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+    local $/;  # Slurp mode
+    my $json_text = <$fh>;
+    close($fh);
+
     my $data = decode_json($json_text);
     
     # Initialize an empty set to hold versions
@@ -67,15 +72,6 @@ sub get_supported_version {
 
     # Sort versions in reverse order and get the latest version
     my $latest_version = (sort {$b cmp $a} keys %versions)[0];
-}
-
-sub read_file {
-    my ($filename) = @_;
-    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
-    local $/; # Slurp mode
-    my $content = <$fh>;
-    close($fh);
-    return $content;
 }
 
 sub apkmirror {

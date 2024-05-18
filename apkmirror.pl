@@ -2,6 +2,8 @@
 use strict;
 use warnings;
 use File::Temp qw(tempfile);
+use File::Slurp;
+
 
 sub req {
     my ($url, $output) = @_;
@@ -65,6 +67,15 @@ sub get_supported_version {
 
     # Sort versions in reverse order and get the latest version
     my $latest_version = (sort {$b cmp $a} keys %versions)[0];
+}
+
+sub read_file {
+    my ($filename) = @_;
+    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+    local $/; # Slurp mode
+    my $content = <$fh>;
+    close($fh);
+    return $content;
 }
 
 sub apkmirror {

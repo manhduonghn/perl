@@ -65,7 +65,7 @@ sub get_supported_version {
     return $version;
 }
 
-sub uptodown {
+sub apkpure {
     my ($name, $package) = @_;
 
     my ($fh, $tempfile) = tempfile();
@@ -74,7 +74,7 @@ sub uptodown {
     if (my $supported_version = get_supported_version($package)) {
         $version = $supported_version;
     } else {
-        my $page = "https://$name.en.uptodown.com/android/versions";
+        my $page = "https://apkpure.net/$name/$package/versions";
         req($page, $tempfile);
 
         open my $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
@@ -84,7 +84,7 @@ sub uptodown {
         my @version;
         my $i = 0;
         for my $line (@lines) {
-            if ($line =~ /.*class="version">(.*?)<\/div>/ && ++$i == 1) {
+            if ($line =~ /data-dt-version="(.*?)"/ && ++$i == 1) {
                 $version = $1;
                 last;
             }
@@ -92,44 +92,25 @@ sub uptodown {
         unlink $tempfile;
     }
 
-    my $url = "https://$name.en.uptodown.com/android/versions";
+    my $url = "https://apkpure.net/$name/$package/versions";
     req($url, $tempfile);
 
     open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
     my @lines = <$fh>;
     close $fh;
-
-    filter_lines(qr/>\s*$version\s*<\/span>/, 5, \@lines);
     
-    my $download_page_url;
+    my $download_url;
     my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*data-url="(.*[^"]*)"/ && ++$i == 1) {
-            $download_page_url = "$1";
-            $download_page_url =~ s/\/download\//\/post-download\//g;
+        if ($line =~ /.*href="(.*\/APK\/$package[^"]*)".*/ && ++$i == 1) {
+            $download_url = "$1";
             last;
         }
     }
     unlink $tempfile;   
-
-    req($download_page_url, $tempfile);
-    
-    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    @lines = <$fh>;
-    close $fh;
-    
-    my $final_url;
-    my $i = 0;
-    for my $line (@lines) {
-        if ($line =~ /.*"post-download" data-url="([^"]*)"/ && ++$i == 1) {
-            $final_url = "https://dw.uptodown.com/dwn/$1";
-            last;
-        }
-    }
-    unlink $tempfile;
     
     my $apk_filename = "$name-v$version.apk";
-    req($final_url, $apk_filename);
+    req($download_url, $apk_filename);
 }
 
 uptodown('youtube-music', 'com.google.android.apps.youtube.music');

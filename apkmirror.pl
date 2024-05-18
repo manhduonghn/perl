@@ -40,8 +40,11 @@ sub get_supported_version {
     my $filename = 'patches.json';
     
     open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
-    local $/;  # Slurp mode
-    my $json_text = <$fh>;
+
+    my $json_text = '';
+    while (my $line = <$fh>) {
+        $json_text .= $line;
+    }
     close($fh);
 
     my $data = decode_json($json_text);
@@ -72,9 +75,9 @@ sub get_supported_version {
     }
 
     # Sort versions in reverse order and get the latest version
-    my $version = (sort {$b cmp $a} keys %versions)[0];
+    my $latest_version = (sort {$b cmp $a} keys %versions)[0];
 
-    return $version;
+    return $latest_version;
 }
 
 sub apkmirror {

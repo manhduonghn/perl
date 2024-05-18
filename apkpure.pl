@@ -58,12 +58,12 @@ sub apkpure {
 
     my ($fh, $tempfile) = tempfile();
     my $version;
+    my $url = "https://apkpure.net/$name/$package/download/$version";
 
     if (my $supported_version = get_supported_version($package)) {
         $version = $supported_version;
     } else {
-        my $page = "https://apkpure.net/$name/$package/versions";
-        req($page, $tempfile);
+        req($url, $tempfile);
 
         open my $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
         my @lines = <$file_handle>;
@@ -79,8 +79,7 @@ sub apkpure {
         }
         unlink $tempfile;
     }
-
-    my $url = "https://apkpure.net/$name/$package/download/$version";
+    
     req($url, $tempfile);
 
     open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";

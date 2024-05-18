@@ -83,12 +83,11 @@ sub uptodown {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /.*class="version">(.*?)</) {
+            if ($line =~ /.*class="version">(.*?)<\/div>/) {
                 my $version = $1;
                 print "$version\n";
             }
         }
-        print "$version\n" if $version;
         unlink $tempfile;
     }
 

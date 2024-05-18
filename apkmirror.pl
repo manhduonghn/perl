@@ -156,7 +156,7 @@ sub apkmirror {
     unlink $tempfile;
     
     # Final download
-    my $apk_filename = "youtube-v19.11.43.apk";
+    my $apk_filename = "$name-v$version.apk";
     req($final_url, $apk_filename);
 }
 

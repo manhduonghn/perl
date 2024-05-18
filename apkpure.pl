@@ -72,11 +72,11 @@ sub apkpure {
         my @version;
         my $i = 0;
         for my $line (@lines) {
-            if ($line =~ /data-dt-version="(.*?)"/ && ++$i == 1) {
+            if ($line =~ /.*data-dt-version="(.*?)"/ && ++$i == 1) {
                 $version = $1;
-                last;
             }
         }
+        print "$version\n" if $version;
         unlink $tempfile;
     }
 

@@ -83,8 +83,9 @@ sub uptodown {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /.*class="version">(.*?)<\/div>/) {
+            if ($line =~ /.*class="version">(.*?)<\/div>/ && ++$i == 1) {
                 $version = $1;
+                last;
             }
         }
         unlink $tempfile;
@@ -101,7 +102,7 @@ sub uptodown {
     
     my $download_page_url;
     for my $line (@lines) {
-        if ($line =~ /.*data-url="(.*[^"]*)"/) {
+        if ($line =~ /.*data-url="(.*[^"]*)"/ && ++$i == 1) {
             $download_page_url = "$1";
             $download_page_url =~ s/\/download\//\/post-download\//g;
             last;
@@ -117,7 +118,7 @@ sub uptodown {
     
     my $final_url;
     for my $line (@lines) {
-        if ($line =~ /.*"post-download" data-url="([^"]*)"/) {
+        if ($line =~ /.*"post-download" data-url="([^"]*)"/ && ++$i == 1) {
             $final_url = "https://dw.uptodown.com/dwn/$1";
             last;
         }

@@ -116,4 +116,4 @@ sub apkmirror {
 }
 
 # Execute the apkmirror subroutine
-apkmirror('google-inc', 'google', 'com.android.google.youtube');
+apkmirror('google-inc', 'youtube', 'com.android.google.youtube');

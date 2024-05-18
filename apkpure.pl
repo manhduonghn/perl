@@ -71,8 +71,8 @@ sub apkpure {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /data-dt-version="(.*?)" data-dt-versioncode/) {
-                $version = "$1";
+            if ($line =~ /href(.*?)data-dt-version="(.*?)" data-dt-versioncode/) {
+                $version = "$2";
             }
         }
         print "$version\n" if $version;

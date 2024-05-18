@@ -38,7 +38,7 @@ sub get_supported_version {
     my $pkg_name = shift;
     my $filename = 'patches.json';
     
-    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+    open(my $fh, '<', $filename);
     local $/;  # Slurp mode
     my $json_text = <$fh>;
     close($fh);

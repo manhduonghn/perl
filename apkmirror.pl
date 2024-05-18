@@ -67,7 +67,12 @@ sub apkmirror {
         }
     }
 
-    print "$download_page_url\n";
+    # Check if the URL was found and print it
+    if (defined $download_page_url) {
+        print "$download_page_url\n";
+    } else {
+        print "Download page URL not found.\n";
+    }
 }
 
 # Execute the apkmirror subroutine

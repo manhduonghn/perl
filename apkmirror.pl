@@ -60,91 +60,88 @@ sub apkmirror {
         }
     }
 
-    # Sắp xếp danh sách phiên bản theo thứ tự giảm dần
     @versions = map { s/^\D+//; $_ } @versions;
     @versions = sort { version->parse($b) <=> version->parse($a) } @versions;
 
-    # Lấy phiên bản lớn nhất
-    my $latest_version = $versions[0];
-    print "Phiên bản lớn nhất là: $latest_version\n";
+    my $version = $versions[0];
 
     unlink $tempfile;
-    exit 0;
 
-    # The following code is commented out since the exit statement above will prevent it from being executed.
-    # Uncomment it if needed.
-    # my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
+    my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
+
+    # Create a temporary file to store the output
+    my ($fh, $tempfile) = tempfile();
 
     # Fetch the URL and store the output in the temporary file
-    # req($url, $tempfile);
+    req($url, $tempfile);
 
     # Read the temporary file content line by line
-    # open $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    # @lines = <$file_handle>;
-    # close $file_handle;
+    open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    my @lines = <$file>;
+    close $file;
 
     # Step 1: Filter by dpi
-    # filter_lines(qr/>\s*$dpi\s*</, 16, \@lines);
+    filter_lines(qr/>\s*$dpi\s*</, 16, \@lines);
 
     # Step 2: Filter by arch
-    # filter_lines(qr/>\s*$arch\s*</, 14, \@lines);
+    filter_lines(qr/>\s*$arch\s*</, 14, \@lines);
 
     # Step 3: Filter by APK
-    # filter_lines(qr/>\s*APK\s*</, 6, \@lines);
+    filter_lines(qr/>\s*APK\s*</, 6, \@lines);
 
     # Extract the download page URL
-    # my $download_page_url;
-    # my $i = 0;
-    # for my $line (@lines) {
-    #     if ($line =~ /.*href="(.*[^"]*)".*/ && ++$i == 1) {
-    #         $download_page_url = "https://www.apkmirror.com$1";
-    #         last;
-    #     }
-    # }
+    my $download_page_url;
+    my $i = 0;
+    for my $line (@lines) {
+        if ($line =~ /.*href="(.*[^"]*)".*/ && ++$i == 1) {
+            $download_page_url = "https://www.apkmirror.com$1";
+            last;
+        }
+    }
 
-    # unlink $tempfile;
-
+    unlink $tempfile;
+    
     # Fetch the download page and store the output in the temporary file
-    # req($download_page_url, $tempfile);
+    req($download_page_url, $tempfile);
 
     # Read the temporary file content again
-    # open $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    # @lines = <$file_handle>;
-    # close $file_handle;
+    open $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$file>;
+    close $file;
 
     # Extract final APK download URL from the content
-    # my $dl_apk_url;
-    # for my $line (@lines) {
-    #     if ($line =~ /href="([^"]*key=[^"]*)"/) {
-    #         $dl_apk_url = "https://www.apkmirror.com$1";
-    #         last;
-    #     }
-    # }
+    my $dl_apk_url;
+    for my $line (@lines) {
+        if ($line =~ /href="([^"]*key=[^"]*)"/) {
+            $dl_apk_url = "https://www.apkmirror.com$1";
+            last;
+        }
+    }
 
-    # unlink $tempfile;
-
-    # req($dl_apk_url, $tempfile);
+    unlink $tempfile;
+    
+    req($dl_apk_url, $tempfile);
 
     # Read the temporary file content again
-    # open $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
-    # @lines = <$file_handle>;
-    # close $file_handle;
+    open $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$file>;
+    close $file;
 
     # Extract final APK download URL from the content
-    # my $final_url;
-    # for my $line (@lines) {
-    #     if ($line =~ /href="([^"]*key=[^"]*)"/) {
-    #         $final_url = "https://www.apkmirror.com$1";
-    #         $final_url =~ s/amp;//g;
-    #         last;
-    #     }
-    # }
+    my $final_url;
+    for my $line (@lines) {
+        if ($line =~ /href="([^"]*key=[^"]*)"/) {
+            $final_url = "https://www.apkmirror.com$1";
+            $final_url =~ s/amp;//g;
+            last;
+        }
+    }
 
-    # unlink $tempfile;
-
+    unlink $tempfile;
+    
     # Final download
-    # my $apk_filename = "youtube-v19.11.43.apk";
-    # req($final_url, $apk_filename);
+    my $apk_filename = "$name-v$version.apk";
+    req($final_url, $apk_filename);
 }
 
 # Execute the apkmirror subroutine

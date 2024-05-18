@@ -61,7 +61,7 @@ sub apkmirror {
     }
 
     # Sắp xếp danh sách phiên bản theo thứ tự giảm dần
-    @versions = sort { versioncmp($b, $a) } @versions;
+    @versions = sort { version->parse($b) <=> version->parse($a) } @versions;
 
     # Lấy phiên bản lớn nhất
     my $latest_version = $versions[0];

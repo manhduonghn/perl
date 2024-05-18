@@ -81,12 +81,28 @@ sub apkmirror {
     my ($org, $name, $package, $arch, $dpi) = @_;
     $dpi ||= 'nodpi';
     $arch ||= 'universal';
-    my $version = get_supported_version($package);
     
-    my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
-
     # Create a temporary file to store the output
     my ($fh, $tempfile) = tempfile();
+    
+    # my $version = get_supported_version($package);
+    my $url = "https://www.apkmirror.com/uploads/?appcategory=$name";
+    # Read the temporary file content line by line
+    open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    my @lines = <$file>;
+    close $file;
+
+    my $count = 0;
+    for my $line (@lines) {
+        if ($line =~ /fontBlack(.*?)>(.*?)<\/a>/) {
+            my $versions = $2;
+            $count++;
+            print "$versions\n" if $count <= 20 && $line !~ /alpha|beta/i;
+        }
+    }
+    exit 0;
+    
+    my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
 
     # Fetch the URL and store the output in the temporary file
     req($url, $tempfile);

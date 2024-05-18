@@ -21,6 +21,18 @@ sub req {
         or die "Failed to execute $command: $?";
 }
 
+sub filter_lines {
+    my ($pattern, $size, $buffer_ref) = @_;
+    my @temp_buffer;
+    for my $line (@$buffer_ref) {
+        push @temp_buffer, $line;
+        if ($line =~ /$pattern/) {
+            @$buffer_ref = @temp_buffer[-$size..-1] if @temp_buffer > $size;
+            return;
+        }
+    }
+}
+
 sub get_supported_version {
     my $pkg_name = shift;
     my $filename = 'patches.json';
@@ -53,17 +65,17 @@ sub get_supported_version {
     return $version;
 }
 
-sub apkpure {
+sub uptodown {
     my ($name, $package) = @_;
 
     my ($fh, $tempfile) = tempfile();
     my $version;
-    my $url = "https://apkpure.net/$name/$package/download/$version";
 
     if (my $supported_version = get_supported_version($package)) {
         $version = $supported_version;
     } else {
-        req($url, $tempfile);
+        my $page = "https://$name.en.uptodown.com/android/versions";
+        req($page, $tempfile);
 
         open my $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
         my @lines = <$file_handle>;
@@ -72,32 +84,52 @@ sub apkpure {
         my @version;
         my $i = 0;
         for my $line (@lines) {
-            if ($line =~ /.*/data-dt-version="(.*?)"/ && ++$i == 1) {
+            if ($line =~ /.*class="version">(.*?)<\/div>/ && ++$i == 1) {
                 $version = $1;
                 last;
             }
         }
-       # unlink $tempfile;
+        unlink $tempfile;
     }
-    
+
+    my $url = "https://$name.en.uptodown.com/android/versions";
     req($url, $tempfile);
 
     open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
     my @lines = <$fh>;
-    close $fh;    
+    close $fh;
+
+    filter_lines(qr/>\s*$version\s*<\/span>/, 5, \@lines);
+    
+    my $download_page_url;
+    my $i = 0;
+    for my $line (@lines) {
+        if ($line =~ /.*data-url="(.*[^"]*)"/ && ++$i == 1) {
+            $download_page_url = "$1";
+            $download_page_url =~ s/\/download\//\/post-download\//g;
+            last;
+        }
+    }
+    unlink $tempfile;   
+
+    req($download_page_url, $tempfile);
+    
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$fh>;
+    close $fh;
     
     my $final_url;
     my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*href="(.*\/APK\/$package[^"]*)".*/ && ++$i == 1) {
-            $final_url = "$1";
+        if ($line =~ /.*"post-download" data-url="([^"]*)"/ && ++$i == 1) {
+            $final_url = "https://dw.uptodown.com/dwn/$1";
             last;
         }
     }
-    # unlink $tempfile;
+    unlink $tempfile;
     
     my $apk_filename = "$name-v$version.apk";
     req($final_url, $apk_filename);
 }
 
-apkpure('youtube-music', 'com.google.android.apps.youtube.music');
+uptodown('youtube-music', 'com.google.android.apps.youtube.music');

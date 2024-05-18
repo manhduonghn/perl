@@ -67,9 +67,26 @@ sub apkmirror {
         }
     }
 
+    # Fetch the download page and store the output in the temporary file
+    req($download_page_url, $tempfile);
+
+    # Read the temporary file content again
+    open $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$file>;
+    close $file;
+
+    # Extract final APK download URL from the content
+    my $apk_url;
+    for my $line (@lines) {
+        if ($line =~ /href="([^"]*key=[^"]*)"/) {
+            $apk_url = "https://www.apkmirror.com$1";
+            last;
+        }
+    }
+
     # Check if the URL was found and print it
-    if (defined $download_page_url) {
-        print "$download_page_url\n";
+    if (defined $apk_url) {
+        print "$apk_url\n";
     } else {
         print "Download page URL not found.\n";
     }

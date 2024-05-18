@@ -41,10 +41,7 @@ sub get_supported_version {
     
     open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
 
-    my $json_text = '';
-    while (my $line = <$fh>) {
-        $json_text .= $line;
-    }
+    my $json_text = do { local $/; <$fh> };
     close($fh);
 
     my $data = decode_json($json_text);

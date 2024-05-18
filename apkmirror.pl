@@ -36,23 +36,23 @@ sub filter_lines {
 }
 
 sub get_supported_version {
-    my ($pkg_name) = @_;
+    my $pkg_name = shift;
+    my $filename = 'patches.json';
+    
+    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+    local $/;  # Slurp mode
+    my $json_text = <$fh>;
+    close($fh);
 
-    # Read JSON data from the file patches.json
-    open my $fh, '<', 'patches.json' or die "Can't open file: $!";
-    my $json_data = do { local $/; <$fh> };
-    close $fh;
-
-    # Decode the JSON data
-    my $data = decode_json($json_data);
-
+    my $data = decode_json($json_text);
+    
     # Initialize an empty set to hold versions
     my %versions;
 
     # Iterate over each patch in the JSON data
     foreach my $patch (@{$data}) {
         my $compatible_packages = $patch->{'compatiblePackages'};
-        
+    
         # Check if compatiblePackages is a non-empty list
         if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
             # Iterate over each package in compatiblePackages
@@ -72,9 +72,9 @@ sub get_supported_version {
     }
 
     # Sort versions in reverse order and get the latest version
-    my $latest_version = (sort {$b cmp $a} keys %versions)[0];
+    my $version = (sort {$b cmp $a} keys %versions)[0];
 
-    return $latest_version;
+    return $version;
 }
 
 sub apkmirror {
@@ -156,7 +156,7 @@ sub apkmirror {
     unlink $tempfile;
     
     # Final download
-    my $apk_filename = "$name-v$version.apk";
+    my $apk_filename = "youtube-v19.11.43.apk";
     req($final_url, $apk_filename);
 }
 

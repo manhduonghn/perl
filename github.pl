@@ -51,3 +51,53 @@ sub download_resources {
 }
 
 download_resources();
+
+#!/usr/bin/perl
+use strict;
+use warnings;
+use JSON;
+
+# Function to get the latest supported version of a package
+sub get_supported_version {
+    my ($pkg_name, $json_text) = @_;
+
+    # Decode the JSON data
+    my $data = decode_json($json_text);
+
+    # Initialize an empty set to hold versions
+    my %versions;
+
+    # Iterate over each patch in the JSON data
+    foreach my $patch (@{$data}) {
+        my $compatible_packages = $patch->{'compatiblePackages'};
+        
+        # Check if compatiblePackages is a non-empty list
+        if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
+            # Iterate over each package in compatiblePackages
+            foreach my $package (@$compatible_packages) {
+                # Check if package name and versions list is not empty
+                if (
+                    $package->{'name'} eq $pkg_name &&
+                    $package->{'versions'} && ref($package->{'versions'}) eq 'ARRAY' && @{$package->{'versions'}}
+                ) {
+                    # Add versions to the set
+                    foreach my $version (@{$package->{'versions'}}) {
+                        $versions{$version} = 1;
+                    }
+                }
+            }
+        }
+    }
+
+    # Sort versions in reverse order and get the latest version
+    my $latest_version = (sort {$b cmp $a} keys %versions)[0];
+
+    return $latest_version;
+}
+
+# Example usage:
+my $package_name = shift or die "Usage: $0 <package>\n";
+my $json_text = do { local $/; <STDIN> };
+
+my $latest_supported_version = get_supported_version($package_name, 'patches.json');
+print "$latest_supported_version\n" if $latest_supported_version;

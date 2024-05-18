@@ -46,35 +46,15 @@ sub get_supported_version {
 
     my $data = decode_json($json_text);
     
-    # Initialize an empty set to hold versions
-    my %versions;
-
-    # Iterate over each patch in the JSON data
-    foreach my $patch (@{$data}) {
-        my $compatible_packages = $patch->{'compatiblePackages'};
-    
-        # Check if compatiblePackages is a non-empty list
-        if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
-            # Iterate over each package in compatiblePackages
-            foreach my $package (@$compatible_packages) {
-                # Check if package name and versions list is not empty
-                if (
-                    $package->{'name'} eq $pkg_name &&
-                    $package->{'versions'} && ref($package->{'versions'}) eq 'ARRAY' && @{$package->{'versions'}}
-                ) {
-                    # Add versions to the set
-                    foreach my $version (@{$package->{'versions'}}) {
-                        $versions{$version} = 1;
-                    }
-                }
-            }
+    my $max_version;
+    foreach my $obj (@{$data}) {
+        if ($obj->{name} eq $pkg_name && $obj->{versions}) {
+            $max_version = $obj->{versions}->[-1];
+            last;
         }
     }
 
-    # Sort versions in reverse order and get the latest version
-    my $latest_version = (sort {$b cmp $a} keys %versions)[0];
-
-    return $latest_version;
+    return $max_version;
 }
 
 sub apkmirror {

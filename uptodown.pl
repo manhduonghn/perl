@@ -85,6 +85,7 @@ sub uptodown {
         for my $line (@lines) {
             if ($line =~ /.*class="version">(.*?)</) {
                 my $version = $1;
+                print "$version\n";
             }
         }
         print "$version\n" if $version;

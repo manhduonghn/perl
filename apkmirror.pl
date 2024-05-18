@@ -21,3 +21,12 @@ sub req {
     system($command) == 0
         or die "Failed to execute $command: $?";
 }
+
+sub apkmirror {
+    my $version = "19.11.43"
+    $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
+    my ($fh, $tempfile) = tempfile();
+    req($url, $tempfile);
+}
+
+apkmirror();

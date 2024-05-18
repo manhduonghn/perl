@@ -24,7 +24,7 @@ sub req {
 
 sub apkmirror {
     my $version = "19.11.43"
-    $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
+    $url = "https://www.apkmirror.com/apk/google-inc/youtube/youtube-" . (join '-', split /\./, $version) . "-release";
     my ($fh, $tempfile) = tempfile();
     req($url, $tempfile);
 }

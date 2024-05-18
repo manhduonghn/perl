@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use JSON;
 use File::Temp qw(tempfile);
-use Path::Tiny;
 
 sub req {
     my ($url, $output) = @_;
@@ -38,16 +37,23 @@ sub get_supported_version {
     my $pkg_name = shift;
     my $filename = 'patches.json';
     
-    my $json_text = path($filename)->slurp_utf8;
+    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+    local $/; 
+    my $json_text = <$fh>;
+    close($fh);
+
     my $data = decode_json($json_text);
     my %versions;
 
     foreach my $patch (@{$data}) {
         my $compatible_packages = $patch->{'compatiblePackages'};
     
-        if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
+            if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
             foreach my $package (@$compatible_packages) {
-                if ($package->{'name'} eq $pkg_name && $package->{'versions'} && ref($package->{'versions'}) eq 'ARRAY' && @{$package->{'versions'}}) {
+                if (
+                    $package->{'name'} eq $pkg_name &&
+                    $package->{'versions'} && ref($package->{'versions'}) eq 'ARRAY' && @{$package->{'versions'}}
+                ) {
                     foreach my $version (@{$package->{'versions'}}) {
                         $versions{$version} = 1;
                     }
@@ -73,7 +79,9 @@ sub apkmirror {
         my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
         req($page, $tempfile);
 
-        my @lines = path($tempfile)->lines_utf8;
+        open my $file_handle, '<', $tempfile or die "Could not open file '$tempfile': $!";
+        my @lines = <$file_handle>;
+        close $file_handle;
 
         my $count = 0;
         my @versions;
@@ -94,7 +102,9 @@ sub apkmirror {
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
     req($url, $tempfile);
 
-    my @lines = path($tempfile)->lines_utf8;
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    my @lines = <$fh>;
+    close $fh;
 
     filter_lines(qr/>\s*$dpi\s*</, 16, \@lines);
     filter_lines(qr/>\s*$arch\s*</, 14, \@lines);
@@ -112,7 +122,9 @@ sub apkmirror {
     
     req($download_page_url, $tempfile);
 
-    @lines = path($tempfile)->lines_utf8;
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$fh>;
+    close $fh;
 
     my $dl_apk_url;
     for my $line (@lines) {
@@ -125,7 +137,9 @@ sub apkmirror {
     
     req($dl_apk_url, $tempfile);
     
-    @lines = path($tempfile)->lines_utf8;
+    open $fh, '<', $tempfile or die "Could not open file '$tempfile': $!";
+    @lines = <$fh>;
+    close $fh;
     
     my $final_url;
     for my $line (@lines) {

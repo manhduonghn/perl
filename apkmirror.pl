@@ -190,4 +190,4 @@ sub apkmirror {
 }
 
 # Execute the apkmirror subroutine
-apkmirror('google-inc', 'youtube', 'com.google.android.youtube');
+apkmirror('google-inc', 'youtube-music', 'com.google.android.apps.youtube.music', 'arm64-v8a');

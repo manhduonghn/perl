@@ -99,8 +99,8 @@ sub apkmirror {
     my $final_url;
     for my $line (@lines) {
         if ($line =~ /href="([^"]*key=[^"]*)"/) {
-            $final_url =~ s/amp;//g;
             $final_url = "https://www.apkmirror.com$1";
+            $final_url =~ s/amp;//g;
             last;
         }
     }

@@ -71,11 +71,10 @@ sub apkpure {
 
         my @version;
         for my $line (@lines) {
-            if ($line =~ /href(.*?)data-dt-version="(.*?)" data-dt-versioncode/) {
-                $version = "$2";
+            if ($line =~ /data-dt-version="(.*?)"/) {
+                $version = "$1";
             }
         }
-        print "$version\n" if $version;
         unlink $tempfile;
     }
 

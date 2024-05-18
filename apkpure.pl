@@ -77,7 +77,7 @@ sub apkpure {
                 last;
             }
         }
-        unlink $tempfile;
+       # unlink $tempfile;
     }
     
     req($url, $tempfile);
@@ -94,7 +94,7 @@ sub apkpure {
             last;
         }
     }
-    unlink $tempfile;
+    # unlink $tempfile;
     
     my $apk_filename = "$name-v$version.apk";
     req($final_url, $apk_filename);

@@ -29,7 +29,7 @@ sub filter_lines {
     for my $line (@$buffer_ref) {
         push @temp_buffer, $line;
         if ($line =~ /$pattern/) {
-            print "Pattern matched: $line\n";
+            # print "Pattern matched: $line\n";
             @$buffer_ref = @temp_buffer[-$size..-1] if @temp_buffer > $size;
             print "Buffer after filtering: ", join("", @$buffer_ref), "\n";
             return;
@@ -40,11 +40,11 @@ sub filter_lines {
 sub apkmirror {
     my $version = "19.11.43";  # Corrected missing semicolon
     my $url = "https://www.apkmirror.com/apk/google-inc/youtube/youtube-" . (join '-', split /\./, $version) . "-release";
-    print "URL: $url\n";
+    # print "URL: $url\n";
 
     # Create a temporary file to store the output
     my ($fh, $tempfile) = tempfile();
-    print "Temporary file created: $tempfile\n";
+    # print "Temporary file created: $tempfile\n";
 
     # Fetch the URL and store the output in the temporary file
     req($url, $tempfile);
@@ -53,7 +53,7 @@ sub apkmirror {
     open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
     my @lines = <$file>;
     close $file;
-    print "File content read: ", join("", @lines), "\n";
+    # print "File content read: ", join("", @lines), "\n";
 
     # Step 1: Filter by dpi
     filter_lines(qr/>\s*nodpi\s*</, 16, \@lines);
@@ -68,7 +68,7 @@ sub apkmirror {
     my $download_page_url;
     my $i = 0;
     for my $line (@lines) {
-        if ($line =~ /.*href="(\/apk\/google-inc\/youtube\/[^"]*\/download\/)".*/ && ++$i == 1) {
+        if ($line =~ /.*href="(.*apk-[^"]*)".*/ && ++$i == 1) {
             $download_page_url = "https://www.apkmirror.com$1";
             print "Download page URL found: $download_page_url\n";
             last;

@@ -70,9 +70,8 @@ sub apkpure {
         close $file_handle;
 
         my @version;
-        my $i = 0;
         for my $line (@lines) {
-            if ($line =~ /.*data-dt-version="(.*?)"/ && ++$i == 1) {
+            if ($line =~ /.*data-dt-version="(.*?)"/) {
                 $version = $1;
             }
         }

@@ -60,8 +60,12 @@ sub apkmirror {
         }
     }
 
-    # Print or process the collected versions
-    print join("\n", @versions) . "\n";
+    # Sắp xếp danh sách phiên bản theo thứ tự giảm dần
+    @versions = sort { versioncmp($b, $a) } @versions;
+
+    # Lấy phiên bản lớn nhất
+    my $latest_version = $versions[0];
+    print "Phiên bản lớn nhất là: $latest_version\n";
 
     unlink $tempfile;
     exit 0;

@@ -29,4 +29,4 @@ jobs:
       - name: Run a one-line script
         run: |
           perl github.pl 
-          perl apkmirror.pl 
+          perl apkmirror.pl('google-inc', 'youtube-music', 'com.google.android.apps.youtube.music', 'arm64-v8a')

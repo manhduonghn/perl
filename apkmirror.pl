@@ -34,14 +34,17 @@ sub filter_lines {
 }
 
 sub apkmirror {
-    my $version = "19.11.43";  # Corrected missing semicolon
-    my $url = "https://www.apkmirror.com/apk/google-inc/youtube/youtube-" . (join '-', split /\./, $version) . "-release";
+    my ($org, $name, $package, $arch, $dpi) = @_;
+    $dpi ||= 'nodpi';
+    $arch ||= 'universal';
+    my $version = "19.11.43";  
+    my $apkmirror_url= "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
 
     # Create a temporary file to store the output
     my ($fh, $tempfile) = tempfile();
 
     # Fetch the URL and store the output in the temporary file
-    req($url, $tempfile);
+    req($apkmirror_url, $tempfile);
 
     # Read the temporary file content line by line
     open my $file, '<', $tempfile or die "Could not open file '$tempfile': $!";
@@ -113,4 +116,4 @@ sub apkmirror {
 }
 
 # Execute the apkmirror subroutine
-apkmirror();
+apkmirror('google-inc', 'google', 'com.android.google.youtube');

@@ -2,6 +2,7 @@
 use strict;
 use warnings;
 use FindBin; 
+use Env;
 
 use lib "$FindBin::Bin/utils";
 use apkpure qw(apkpure);
@@ -18,6 +19,7 @@ apkmirror(
     "youtube", 
     "com.google.android.youtube"
 );
+undef $ENV{VERSION}
 
 apkmirror(
     "google-inc", 

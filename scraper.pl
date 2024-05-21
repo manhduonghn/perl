@@ -28,25 +28,30 @@ apkmirror(
     "com.google.android.apps.youtube.music", 
     "arm64-v8a"
 );
+undef $ENV{VERSION};
 
 # Apkpure 
 apkpure(
     "youtube",
     "com.google.android.youtube"
 );
+undef $ENV{VERSION};
 
 apkpure(
     "youtube-music",
     "com.google.android.apps.youtube.music"
 );
+undef $ENV{VERSION};
 
 # Uptodown
 uptodown(
     "youtube",
     "com.google.android.youtube"
 );
+undef $ENV{VERSION};
 
 uptodown(
     "youtube-music",
     "com.google.android.apps.youtube.music"
 );
+undef $ENV{VERSION};

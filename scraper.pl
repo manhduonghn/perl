@@ -19,7 +19,7 @@ apkmirror(
     "youtube", 
     "com.google.android.youtube"
 );
-undef $ENV{VERSION}
+undef $ENV{VERSION};
 
 apkmirror(
     "google-inc", 

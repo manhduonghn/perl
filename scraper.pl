@@ -37,6 +37,7 @@ apkpure(
 );
 undef $ENV{VERSION};
 
+$ENV{VERSION} = "6.51.52";
 apkpure(
     "youtube-music",
     "com.google.android.apps.youtube.music"
@@ -50,6 +51,7 @@ uptodown(
 );
 undef $ENV{VERSION};
 
+$ENV{VERSION} = "6.51.52";
 uptodown(
     "youtube-music",
     "com.google.android.apps.youtube.music"

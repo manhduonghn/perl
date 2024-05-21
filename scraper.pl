@@ -21,6 +21,7 @@ apkmirror(
 );
 undef $ENV{VERSION};
 
+$ENV{VERSION} = "6.51.52";
 apkmirror(
     "google-inc", 
     "youtube-music", 

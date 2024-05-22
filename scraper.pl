@@ -20,7 +20,6 @@ apkmirror(
     "com.google.android.youtube"
 );
 undef $ENV{VERSION};
-exit;
 
 $ENV{VERSION} = "6.51.52";
 apkmirror(
@@ -30,6 +29,13 @@ apkmirror(
     "arm64-v8a"
 );
 undef $ENV{VERSION};
+
+apkmirror(
+    "facebook-2", 
+    "messenger"
+);
+undef $ENV{VERSION};
+exit
 
 # Apkpure 
 apkpure(

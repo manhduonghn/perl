@@ -35,7 +35,7 @@ apkmirror(
     "messenger"
 );
 undef $ENV{VERSION};
-exit
+exit;
 
 # Apkpure 
 apkpure(

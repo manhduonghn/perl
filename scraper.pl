@@ -21,7 +21,7 @@ apkmirror(
 );
 undef $ENV{VERSION};
 
-$ENV{VERSION} = "6.51.52";
+# $ENV{VERSION} = "6.51.52";
 apkmirror(
     "google-inc", 
     "youtube-music", 
@@ -35,7 +35,6 @@ apkmirror(
     "messenger"
 );
 undef $ENV{VERSION};
-exit;
 
 # Apkpure 
 apkpure(
@@ -44,7 +43,7 @@ apkpure(
 );
 undef $ENV{VERSION};
 
-$ENV{VERSION} = "6.51.52";
+# $ENV{VERSION} = "6.51.52";
 apkpure(
     "youtube-music",
     "com.google.android.apps.youtube.music"

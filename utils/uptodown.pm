@@ -29,14 +29,28 @@ sub req {
 }
 
 sub filter_lines {
-    my ($pattern, $size, $buffer_ref) = @_;
-    my @temp_buffer;
+    my ($pattern, $buffer_ref) = @_;
+    my @temp_buffer = ();
+    my $last_target_index = -1;
+    my $index = 0;
+
     for my $line (@$buffer_ref) {
-        push @temp_buffer, $line;
+        push(@temp_buffer, $line);
+
+        if ($line =~ /<div\s+data-url/) {
+            $last_target_index = $index;
+        }
+
         if ($line =~ /$pattern/) {
-            @$buffer_ref = @temp_buffer[-$size..-1] if @temp_buffer > $size;
+            if ($last_target_index != -1) {
+                @$buffer_ref = @temp_buffer[$last_target_index..$#temp_buffer];
+            } else {
+                @$buffer_ref = @temp_buffer;
+            }
             return;
         }
+
+        $index++;
     }
 }
 
@@ -103,7 +117,7 @@ sub uptodown {
 
     my @lines = split /\n/, $download_page_content;
 
-    filter_lines(qr/>\s*$version\s*<\/span>/, 5, \@lines);
+    filter_lines(qr/>\s*$version\s*<\/span>/, \@lines);
     
     my $download_page_url;
     for my $line (@lines) {

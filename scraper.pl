@@ -20,6 +20,7 @@ apkmirror(
     "com.google.android.youtube"
 );
 undef $ENV{VERSION};
+exit;
 
 $ENV{VERSION} = "6.51.52";
 apkmirror(

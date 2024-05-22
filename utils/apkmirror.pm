@@ -55,6 +55,7 @@ sub filter_lines {
 
 sub get_supported_version {
     my $pkg_name = shift;
+    return unless defined $pkg_name;
     my $filename = 'patches.json';
     
     open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";

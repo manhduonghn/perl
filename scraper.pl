@@ -30,6 +30,7 @@ apkmirror(
 );
 undef $ENV{VERSION};
 
+$ENV{VERSION} = "457.1.0.45.109";
 apkmirror(
     "facebook-2", 
     "messenger"

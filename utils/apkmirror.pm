@@ -23,6 +23,7 @@ sub req {
     );
 
     my $command = "wget $headers --keep-session-cookies --timeout=30 -nv -O $output \"$url\"";
+    print "Executing command: $command\n"; # Debugging statement
     my $content = `$command`;
     return $content;
 }
@@ -57,6 +58,7 @@ sub filter_lines {
     }
 
     @$buffer_ref = @result_buffer; 
+    print "Filtered lines with pattern '$pattern'. Resulting lines: ", scalar(@result_buffer), "\n"; # Debugging statement
 }
 
 sub get_supported_version {
@@ -89,6 +91,7 @@ sub get_supported_version {
         }
     }
     my $version = (sort {$b cmp $a} keys %versions)[0];
+    print "Found supported version for package '$pkg_name': $version\n"; # Debugging statement
     return $version;
 }
 
@@ -105,6 +108,7 @@ sub apkmirror {
         } else {
             my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
             my $page_content = req($page);
+            print "Fetched APKMirror page content for $name\n"; # Debugging statement
 
             my @lines = split /\n/, $page_content;
 
@@ -122,10 +126,12 @@ sub apkmirror {
             @versions = sort { version->parse($b) <=> version->parse($a) } @versions;
             $version = $versions[0];
             $ENV{VERSION} = $version;
+            print "Determined latest version: $version\n"; # Debugging statement
         }
     }
 
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
+    print "Fetching APK page URL: $url\n"; # Debugging statement
     my $apk_page_content = req($url);
 
     my @lines = split /\n/, $apk_page_content;
@@ -146,6 +152,7 @@ sub apkmirror {
         }
     }
     
+    print "Found download page URL: $download_page_url\n"; # Debugging statement
     my $download_page_content = req($download_page_url);
 
     @lines = split /\n/, $download_page_content;
@@ -158,6 +165,7 @@ sub apkmirror {
         }
     }
 
+    print "Found download APK URL: $dl_apk_url\n"; # Debugging statement
     my $dl_apk_content = req($dl_apk_url);
 
     @lines = split /\n/, $dl_apk_content;
@@ -174,7 +182,9 @@ sub apkmirror {
         }
     }
 
+    print "Final download URL: $final_url\n"; # Debugging statement
     my $apk_filename = "$name-v$version.apk";
+    print "Downloading APK to file: $apk_filename\n"; # Debugging statement
     req($final_url, $apk_filename);
 }
 

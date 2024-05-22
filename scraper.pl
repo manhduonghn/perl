@@ -36,6 +36,8 @@ apkmirror(
 );
 undef $ENV{VERSION};
 
+exit;
+
 # Apkpure 
 apkpure(
     "youtube",

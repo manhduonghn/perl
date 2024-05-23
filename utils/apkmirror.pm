@@ -5,26 +5,42 @@ use strict;
 use warnings;
 use JSON;
 use Env;
+use HTTP::Tiny;
 use Exporter 'import';
 
 our @EXPORT_OK = qw(apkmirror);
 
+
 sub req {
     my ($url, $output) = @_;
     $output ||= '-';
-    my $headers = join(' ',
-        '--header="User-Agent: Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0"',
-        '--header="Content-Type: application/octet-stream"',
-        '--header="Accept-Language: en-US,en;q=0.9"',
-        '--header="Connection: keep-alive"',
-        '--header="Upgrade-Insecure-Requests: 1"',
-        '--header="Cache-Control: max-age=0"',
-        '--header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"'
+
+    my $ua = HTTP::Tiny->new(
+        agent => 'Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0',
+        timeout => 30,
+        default_headers => {
+            'Content-Type' => 'application/octet-stream',
+            'Accept-Language' => 'en-US,en;q=0.9',
+            'Connection' => 'keep-alive',
+            'Upgrade-Insecure-Requests' => '1',
+            'Cache-Control' => 'max-age=0',
+            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
+        },
     );
 
-    my $command = "wget $headers --keep-session-cookies --timeout=30 -nv -O $output \"$url\"";
-    my $content = `$command`;
-    return $content;
+    my $response = $ua->get($url);
+
+    if ($response->{success}) {
+        if ($output eq '-') {
+            return $response->{content};
+        } else {
+            open my $fh, '>', $output or die "Could not open file '$output' $!";
+            print $fh $response->{content};
+            close $fh;
+        }
+    } else {
+        die "HTTP request failed: $response->{status} $response->{reason}";
+    }
 }
 
 sub filter_lines {

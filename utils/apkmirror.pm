@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use JSON;
 use Env;
-use HTTP::Tiny;
+use HTTP::Tiny::UA;
 use Exporter 'import';
 
 our @EXPORT_OK = qw(apkmirror);
@@ -14,7 +14,7 @@ sub req {
     my ($url, $output) = @_;
     $output ||= '-';
 
-    my $ua = HTTP::Tiny->new(
+    my $ua = HTTP::Tiny::UA->new(
         agent => 'Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0',
         timeout => 30,
         default_headers => {
@@ -33,7 +33,7 @@ sub req {
         if ($output eq '-') {
             return $response->{content};
         } else {
-            open my $fh, '>', $output or die "Could not open file '$output' $!";
+            open my $fh, '>', $output or die "Could not open file '$output': $!";
             print $fh $response->{content};
             close $fh;
         }

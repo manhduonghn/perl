@@ -173,7 +173,7 @@ sub apkmirror {
     for my $line (@lines) {
         if ($line =~ /href="(.*key=[^"]*)"/) {
             $final_url = $1; 
-            print "Href: $final_url";
+            print "Href: $final_url\n";
             unless ($final_url =~ /^https:\/\/www\.apkmirror\.com/) {
                 $final_url = "https://www.apkmirror.com$1";
             }

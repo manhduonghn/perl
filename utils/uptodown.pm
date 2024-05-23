@@ -58,6 +58,8 @@ sub filter_lines {
     }
 
     @$buffer_ref = @result_buffer;
+    print "Filtered lines with pattern '$pattern'. Resulting lines: ", scalar(@result_buffer), "\n";
+    print "Resulting buffer:\n", join("\n", @$buffer_ref), "\n";
 }
 
 sub get_supported_version {

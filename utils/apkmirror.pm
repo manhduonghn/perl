@@ -181,10 +181,9 @@ sub apkmirror {
                 $final_url .= '&forcebaseapk';
             }
             last;
-            print "Href: $final_url\n";
         }
     }
-
+    print "Href: $final_url\n";
     my $apk_filename = "$name-v$version.apk";
     req($final_url, $apk_filename);
 }

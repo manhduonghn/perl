@@ -172,14 +172,14 @@ sub apkmirror {
     my $final_url;
     for my $line (@lines) {
         if ($line =~ /href="(.*key=[^"]*)"/) {
-            $final_url = "https://www.apkmirror.com$1"; 
-            #unless ($final_url =~ /^https:\/\/www\.apkmirror\.com/) {
-             #   $final_url = "https://www.apkmirror.com$1";
-            #}
-            #$final_url =~ s/amp;//g;
-            #unless ($final_url =~ /&forcebaseapk$/) {
-            #    $final_url .= '&forcebaseapk';
-            #}
+            $final_url = $1; 
+            unless ($final_url =~ /^https:\/\/www\.apkmirror\.com/) {
+                $final_url = "https://www.apkmirror.com$1";
+            }
+            $final_url =~ s/amp;//g;
+            unless ($final_url =~ /&forcebaseapk$/) {
+                $final_url .= '&forcebaseapk';
+            }
             last;
         }
     }

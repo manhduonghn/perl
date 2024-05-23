@@ -179,7 +179,7 @@ sub apkmirror {
             #$final_url =~ s/amp;//g;
             #unless ($final_url =~ /&forcebaseapk$/) {
             #    $final_url .= '&forcebaseapk';
-            }
+            #}
             last;
         }
     }

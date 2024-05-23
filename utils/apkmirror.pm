@@ -10,7 +10,6 @@ use Exporter 'import';
 
 our @EXPORT_OK = qw(apkmirror);
 
-
 sub req {
     my ($url, $output) = @_;
     $output ||= '-';
@@ -39,7 +38,10 @@ sub req {
             close $fh;
         }
     } else {
-        die "HTTP request failed: $response->{status} $response->{reason}";
+        my $status = $response->{status} || 'Unknown';
+        my $reason = $response->{reason} || 'Unknown';
+        my $content = $response->{content} || 'No content';
+        die "HTTP request failed: $status $reason\nContent: $content\n";
     }
 }
 

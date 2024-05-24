@@ -60,7 +60,7 @@ uptodown(
 );
 undef $ENV{VERSION};
 
-$ENV{VERSION} = "6.51.52";
+#$ENV{VERSION} = "6.51.52";
 uptodown(
     "youtube-music",
     "com.google.android.apps.youtube.music"

@@ -1,17 +1,27 @@
-name: Scraper 
+name: Patch Revanced 
 on:
   push:
   workflow_dispatch:
     
 jobs:
   build:
-    name: Scraper 
+    name: Patch YouTube 
     permissions: write-all
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
     steps:
     - name: Checkout Repository
       uses: actions/checkout@main  
+
+    - name: Install Perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: "5.38"
+
+    - name: Install dependencies
+      run: cpanm --installdeps --notest .
 
     - name: Scraper 
       run: perl scraper.pl

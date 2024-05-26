@@ -10,8 +10,18 @@ use HTTP::Request;
 use HTTP::Headers;
 use POSIX qw(strftime);
 use Exporter 'import';
+use Log::Log4perl;
+use FindBin;
+use File::Spec;
 
 our @EXPORT_OK = qw(apkpure);
+
+# Construct the path to the configuration file using FindBin
+my $log_config_path = File::Spec->catfile($FindBin::Bin, 'utils', 'log4perl.conf');
+
+# Initialize Log::Log4perl using the external configuration file
+Log::Log4perl->init($log_config_path);
+my $logger = Log::Log4perl->get_logger();
 
 sub req {
     my ($url, $output) = @_;
@@ -39,15 +49,19 @@ sub req {
         my $size = length($response->decoded_content);
         my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
         if ($output ne '-') {
-            open(my $fh, '>', $output) or die "Could not open file '$output' $!";
+            open(my $fh, '>', $output) or do {
+                $logger->error("Could not open file '$output': $!");
+                die "Could not open file '$output': $!";
+            };
             print $fh $response->decoded_content;
             close($fh);
-            print "$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]\n";
+            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            print "$timestamp URL:$final_url [$size/$size] -> \"-\" [1]\n";
+            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {
+        $logger->error("HTTP GET error: " . $response->status_line);
         die "HTTP GET error: " . $response->status_line;
     }
 }
@@ -56,9 +70,12 @@ sub get_supported_version {
     my $pkg_name = shift;
     return unless defined $pkg_name;
     my $filename = 'patches.json';
-    
-    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
-    local $/; 
+
+    open(my $fh, '<', $filename) or do {
+        $logger->error("Could not open file '$filename': $!");
+        die "Could not open file '$filename': $!";
+    };
+    local $/;
     my $json_text = <$fh>;
     close($fh);
 
@@ -67,7 +84,7 @@ sub get_supported_version {
 
     foreach my $patch (@{$data}) {
         my $compatible_packages = $patch->{'compatiblePackages'};
-    
+
         if ($compatible_packages && ref($compatible_packages) eq 'ARRAY') {
             foreach my $package (@$compatible_packages) {
                 if (
@@ -96,7 +113,11 @@ sub apkpure {
             $ENV{VERSION} = $version;
         } else {
             my $page = "https://apkpure.net/$name/$package/versions";
-            my $page_content = req($page);
+            my $page_content = eval { req($page) };
+            if ($@) {
+                $logger->error("Failed to get page content: $@");
+                die "Failed to get page content: $@";
+            }
 
             my @lines = split /\n/, $page_content;
 
@@ -110,10 +131,14 @@ sub apkpure {
     }
 
     my $url = "https://apkpure.net/$name/$package/download/$version";
-    my $download_page_content = req($url);
+    my $download_page_content = eval { req($url) };
+    if ($@) {
+        $logger->error("Failed to get download page content: $@");
+        die "Failed to get download page content: $@";
+    }
 
     my @lines = split /\n/, $download_page_content;
-    
+
     my $download_url;
     for my $line (@lines) {
         if ($line =~ /.*href="(.*\/APK\/$package[^"]*)".*/) {
@@ -121,9 +146,13 @@ sub apkpure {
             last;
         }
     }
-    
+
     my $apk_filename = "$name-v$version.apk";
-    req($download_url, $apk_filename);
+    eval { req($download_url, $apk_filename) };
+    if ($@) {
+        $logger->error("Failed to download APK: $@");
+        die "Failed to download APK: $@";
+    }
 }
 
 1;

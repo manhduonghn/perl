@@ -11,26 +11,16 @@ use HTTP::Headers;
 use POSIX qw(strftime);
 use Exporter 'import';
 use Log::Log4perl;
+use FindBin;
+use File::Spec;
 
 our @EXPORT_OK = qw(uptodown);
 
-# Initialize Log4perl
-Log::Log4perl->init(\<<'LOGCONF');
-log4perl.rootLogger = DEBUG, LOGFILE, SCREEN
+# Construct the path to the configuration file using FindBin
+my $log_config_path = File::Spec->catfile($FindBin::Bin, 'utils', 'log4perl.conf');
 
-log4perl.appender.LOGFILE = Log::Log4perl::Appender::File
-log4perl.appender.LOGFILE.filename = uptodown.log
-log4perl.appender.LOGFILE.mode = append
-log4perl.appender.LOGFILE.layout = Log::Log4perl::Layout::PatternLayout
-log4perl.appender.LOGFILE.layout.ConversionPattern = %d %p %m %n
-
-log4perl.appender.SCREEN = Log::Log4perl::Appender::Screen
-log4perl.appender.SCREEN.stderr = 1
-log4perl.appender.SCREEN.layout = Log::Log4perl::Layout::PatternLayout
-log4perl.appender.SCREEN.layout.ConversionPattern = %d %p %m %n
-LOGCONF
-
-# Get the logger
+# Initialize Log::Log4perl using the external configuration file
+Log::Log4perl->init($log_config_path);
 my $logger = Log::Log4perl->get_logger();
 
 sub req {

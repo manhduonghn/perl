@@ -9,7 +9,6 @@ use Exporter 'import';
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Headers;
-use POSIX qw(strftime);
 use Log::Log4perl;
 use FindBin;
 use File::Spec;
@@ -44,10 +43,9 @@ sub req {
     my $request = HTTP::Request->new(GET => $url, $headers);
     my $response = $ua->request($request);
 
-    my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
     if ($response->is_success) {
         my $size = length($response->decoded_content);
-        my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
+        my $final_url = $response->base;
         if ($output ne '-') {
             open(my $fh, '>', $output) or do {
                 $logger->error("Could not open file '$output': $!");
@@ -55,9 +53,9 @@ sub req {
             };
             print $fh $response->decoded_content;
             close($fh);
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
+            $logger->info("$URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
+            $logger->info("$URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {
@@ -146,11 +144,7 @@ sub apkmirror {
             $ENV{VERSION} = $version;
         } else {
             my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
-            my $page_content = eval { req($page) };
-            if ($@) {
-                $logger->error("Failed to get page content: $@");
-                die "Failed to get page content: $@";
-            }
+            my $page_content = req($page);
 
             my @lines = split /\n/, $page_content;
 
@@ -172,11 +166,7 @@ sub apkmirror {
     }
 
     my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
-    my $apk_page_content = eval { req($url) };
-    if ($@) {
-        $logger->error("Failed to get APK page content: $@");
-        die "Failed to get APK page content: $@";
-    }
+    my $apk_page_content = req($url);
 
     my @lines = split /\n/, $apk_page_content;
 
@@ -199,11 +189,7 @@ sub apkmirror {
         }
     }
 
-    my $download_page_content = eval { req($download_page_url) };
-    if ($@) {
-        $logger->error("Failed to get download page content: $@");
-        die "Failed to get download page content: $@";
-    }
+    my $download_page_content = req($download_page_url);
 
     @lines = split /\n/, $download_page_content;
 
@@ -218,11 +204,7 @@ sub apkmirror {
         }
     }
 
-    my $dl_apk_content = eval { req($dl_apk_url) };
-    if ($@) {
-        $logger->error("Failed to get APK download URL: $@");
-        die "Failed to get APK download URL: $@";
-    }
+    my $dl_apk_content = req($dl_apk_url);
 
     @lines = split /\n/, $dl_apk_content;
 

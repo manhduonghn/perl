@@ -8,9 +8,18 @@ use Exporter 'import';
 use LWP::UserAgent;
 use HTTP::Request;
 use POSIX qw(strftime);
+use Log::Log4perl;
+use File::Spec;
 
 # Export the download_resources function
 our @EXPORT_OK = qw(download_resources);
+
+# Construct the path to the configuration file
+my $config_path = File::Spec->catfile('utils', 'log4perl.conf');
+
+# Initialize Log::Log4perl using the external configuration file
+Log::Log4perl->init($config_path);
+my $logger = Log::Log4perl->get_logger();
 
 # Subroutine to perform an HTTP GET request and handle the response
 sub req {
@@ -27,21 +36,24 @@ sub req {
     my $request = HTTP::Request->new(GET => $url);
     my $response = $ua->request($request);
 
-    # Get the current timestamp
     my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
     if ($response->is_success) {
         my $size = length($response->decoded_content);
         my $final_url = $response->base;
         if ($output ne '-') {
-            open(my $fh, '>', $output) or die "Could not open file '$output' $!";
+            open(my $fh, '>', $output) or do {
+                $logger->error("Could not open file '$output': $!");
+                die "Could not open file '$output': $!";
+            };
             print $fh $response->decoded_content;
             close($fh);
-            print "$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]\n";
+            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            print "$timestamp URL:$final_url [$size/$size] -> \"-\" [1]\n";
+            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {
+        $logger->error("HTTP GET error: " . $response->status_line);
         die "HTTP GET error: " . $response->status_line;
     }
 }
@@ -54,7 +66,15 @@ sub download_resources {
         my $github_api_url = "https://api.github.com/repos/inotia00/$repo/releases/latest";
 
         my $content = req($github_api_url);
+        if ($@) {
+            $logger->error("Failed to get release data for $repo: $@");
+            next;
+        }
         my $release_data = decode_json($content);
+        if ($@) {
+            $logger->error("Failed to parse JSON for $repo: $@");
+            next;
+        }
 
         for my $asset (@{$release_data->{assets}}) {
             my $asset_name = $asset->{name};
@@ -64,6 +84,9 @@ sub download_resources {
 
             my $download_url = $asset->{browser_download_url};
             req($download_url, $asset_name);
+            if ($@) {
+                $logger->error("Failed to download $asset_name from $repo: $@");
+            }
         }
     }
 }

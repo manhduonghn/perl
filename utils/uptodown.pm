@@ -8,7 +8,6 @@ use Env;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Headers;
-use POSIX qw(strftime);
 use Exporter 'import';
 use Log::Log4perl;
 use FindBin;
@@ -44,7 +43,6 @@ sub req {
     my $request = HTTP::Request->new(GET => $url, $headers);
     my $response = $ua->request($request);
 
-    my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
     if ($response->is_success) {
         my $size = length($response->decoded_content);
         my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
@@ -55,9 +53,9 @@ sub req {
             };
             print $fh $response->decoded_content;
             close($fh);
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
+            $logger->info("URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
+            $logger->info("URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {
@@ -145,7 +143,7 @@ sub uptodown {
             $ENV{VERSION} = $version;
         } else {
             my $page = "https://$name.en.uptodown.com/android/versions";
-            my $page_content = eval { req($page) };
+            my $page_content = req($page);
             if ($@) {
                 $logger->error("Failed to get page content: $@");
                 die "Failed to get page content: $@";
@@ -164,7 +162,7 @@ sub uptodown {
     }
 
     my $url = "https://$name.en.uptodown.com/android/versions";
-    my $download_page_content = eval { req($url) };
+    my $download_page_content = req($url);
     if ($@) {
         $logger->error("Failed to get download page content: $@");
         die "Failed to get download page content: $@";

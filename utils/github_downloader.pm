@@ -64,15 +64,7 @@ sub download_resources {
         my $github_api_url = "https://api.github.com/repos/inotia00/$repo/releases/latest";
 
         my $content = req($github_api_url);
-        if ($@) {
-            $logger->error("Failed to get release data for $repo: $@");
-            next;
-        }
         my $release_data = decode_json($content);
-        if ($@) {
-            $logger->error("Failed to parse JSON for $repo: $@");
-            next;
-        }
 
         for my $asset (@{$release_data->{assets}}) {
             my $asset_name = $asset->{name};

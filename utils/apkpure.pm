@@ -15,11 +15,8 @@ use File::Spec;
 
 our @EXPORT_OK = qw(apkpure);
 
-# Construct the path to the configuration file using FindBin
-my $log_config_path = File::Spec->catfile($FindBin::Bin, 'utils', 'log4perl.conf');
-
-# Initialize Log::Log4perl using the external configuration file
-Log::Log4perl->init($log_config_path);
+my $log_conf = "$FindBin::Bin/log4perl.conf";
+Log::Log4perl::init($log_conf);
 my $logger = Log::Log4perl->get_logger();
 
 sub req {

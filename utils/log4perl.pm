@@ -1,5 +1,11 @@
-#!/usr/bin/perl
+package Log4perl;
+
+use strict;
+use warnings;
+use Log::Log4perl;
 use Log::Log4perl::Layout::PatternLayout;
+
+our $VERSION = '1.00';
 
 # Define a custom layout with colors
 package CustomPatternLayout;
@@ -30,6 +36,19 @@ sub render {
 # Set up custom layout
 my $layout = CustomPatternLayout->new('%d %p %m %n');
 
-# Assign layout to appenders
-log4perl.appender.LOGFILE.layout=$layout
-log4perl.appender.Screen.layout=$layout
+# Configure Log4perl
+Log::Log4perl->init(\<<'LOGCONF');
+log4perl.rootLogger=INFO, LOGFILE, Screen
+
+log4perl.appender.LOGFILE=Log::Log4perl::Appender::File
+log4perl.appender.LOGFILE.filename=github_downloader.log
+log4perl.appender.LOGFILE.mode=append
+log4perl.appender.LOGFILE.layout=CustomPatternLayout
+log4perl.appender.Screen=Log::Log4perl::Appender::Screen
+log4perl.appender.Screen.layout=CustomPatternLayout
+LOGCONF
+
+# Get the logger
+my $logger = Log::Log4perl->get_logger();
+
+1;

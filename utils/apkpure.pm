@@ -1,19 +1,19 @@
 #!/usr/bin/perl
-package apkmirror;
+package apkpure;
 
 use strict;
 use warnings;
 use JSON;
 use Env;
-use Exporter 'import';
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Headers;
+use Exporter 'import';
 use Log::Log4perl;
 use FindBin;
 use File::Spec;
 
-our @EXPORT_OK = qw(apkmirror);
+our @EXPORT_OK = qw(apkpure);
 
 # Construct the path to the configuration file using FindBin
 my $log_config_path = File::Spec->catfile($FindBin::Bin, 'utils', 'log4perl.conf');
@@ -45,7 +45,7 @@ sub req {
 
     if ($response->is_success) {
         my $size = length($response->decoded_content);
-        my $final_url = $response->base;
+        my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
         if ($output ne '-') {
             open(my $fh, '>', $output) or do {
                 $logger->error("Could not open file '$output': $!");
@@ -62,38 +62,6 @@ sub req {
         $logger->error("HTTP GET error: " . $response->status_line);
         die "HTTP GET error: " . $response->status_line;
     }
-}
-
-sub filter_lines {
-    my ($pattern, $buffer_ref) = @_;
-    my @result_buffer = ();
-    my $last_target_index = -1;
-    my $index = 0;
-    my $collecting = 0;
-    my @temp_buffer = ();
-
-    for my $line (@$buffer_ref) {
-        if ($line =~ /<a\s+class="accent_color"/) {
-            $last_target_index = $index;
-            $collecting = 1;
-            @temp_buffer = ();
-        }
-
-        if ($collecting) {
-            push(@temp_buffer, $line);
-        }
-
-        if ($line =~ /$pattern/) {
-            if ($last_target_index != -1 && $collecting) {
-                push @result_buffer, @temp_buffer;
-                $collecting = 0;
-            }
-        }
-
-        $index++;
-    }
-
-    @$buffer_ref = @result_buffer;
 }
 
 sub get_supported_version {
@@ -128,13 +96,12 @@ sub get_supported_version {
             }
         }
     }
-    my $version = (sort { $b cmp $a } keys %versions)[0];
+    my $version = (sort {$b cmp $a} keys %versions)[0];
     return $version;
 }
 
-sub apkmirror {
-    my ($org, $name, $package, $arch, $dpi) = @_;
-    $dpi ||= 'nodpi';
+sub apkpure {
+    my ($name, $package) = @_;
 
     my $version = $ENV{VERSION};
 
@@ -143,88 +110,35 @@ sub apkmirror {
             $version = $supported_version;
             $ENV{VERSION} = $version;
         } else {
-            my $page = "https://www.apkmirror.com/uploads/?appcategory=$name";
+            my $page = "https://apkpure.net/$name/$package/versions";
             my $page_content = req($page);
-
+        
             my @lines = split /\n/, $page_content;
 
-            my $count = 0;
-            my @versions;
             for my $line (@lines) {
-                if ($line =~ /fontBlack(.*?)>(.*?)<\/a>/) {
-                    my $version = $2;
-                    push @versions, $version if $count <= 20 && $line !~ /alpha|beta/i;
-                    $count++;
+                if ($line =~ /"ver-top-down"(.*?)data-dt-version="(.*?)"/) {
+                    $version = "$2";
                 }
-            }
-
-            @versions = map { s/^\D+//; $_ } @versions;
-            @versions = sort { version->parse($b) <=> version->parse($a) } @versions;
-            $version = $versions[0];
             $ENV{VERSION} = $version;
+            }
         }
     }
 
-    my $url = "https://www.apkmirror.com/apk/$org/$name/$name-" . (join '-', split /\./, $version) . "-release";
-    my $apk_page_content = req($url);
+    my $url = "https://apkpure.net/$name/$package/download/$version";
+    my $download_page_content = req($url);
 
-    my @lines = split /\n/, $apk_page_content;
+    my @lines = split /\n/, $download_page_content;
 
-    if (defined $dpi) {
-        filter_lines(qr/>\s*$dpi\s*</, \@lines);
-    }
-    if (defined $arch) {
-        filter_lines(qr/>\s*$arch\s*</, \@lines);
-    }
-    filter_lines(qr/>\s*APK\s*</, \@lines);
-
-    my $download_page_url;
+    my $download_url;
     for my $line (@lines) {
-        if ($line =~ /.*href="(.*[^"]*\/)"/) {
-            $download_page_url = $1;
-            unless ($download_page_url =~ /^https:\/\/www\.apkmirror\.com/) {
-                $download_page_url = "https://www.apkmirror.com$1";
-            }
-            last;
-        }
-    }
-
-    my $download_page_content = req($download_page_url);
-
-    @lines = split /\n/, $download_page_content;
-
-    my $dl_apk_url;
-    for my $line (@lines) {
-        if ($line =~ /href="(.*key=[^"]*)"/) {
-            $dl_apk_url = $1;
-            unless ($dl_apk_url =~ /^https:\/\/www\.apkmirror\.com/) {
-                $dl_apk_url = "https://www.apkmirror.com$1";
-            }
-            last;
-        }
-    }
-
-    my $dl_apk_content = req($dl_apk_url);
-
-    @lines = split /\n/, $dl_apk_content;
-
-    my $final_url;
-    for my $line (@lines) {
-        if ($line =~ /href="(.*key=[^"]*)"/) {
-            $final_url = $1;
-            unless ($final_url =~ /^https:\/\/www\.apkmirror\.com/) {
-                $final_url = "https://www.apkmirror.com$1";
-            }
-            $final_url =~ s/amp;//g;
-            unless ($final_url =~ /&forcebaseapk=true$/) {
-                $final_url .= '&forcebaseapk=true';
-            }
+        if ($line =~ /.*href="(.*\/APK\/$package[^"]*)".*/) {
+            $download_url = "$1";
             last;
         }
     }
 
     my $apk_filename = "$name-v$version.apk";
-    req($final_url, $apk_filename);
+    req($download_url, $apk_filename);
 }
 
 1;

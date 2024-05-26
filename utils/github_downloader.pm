@@ -53,10 +53,11 @@ sub req {
 
 # Subroutine to download resources from specified GitHub repositories
 sub download_resources {
+    my($user) = @_;
     my @repos = qw(revanced-patches revanced-cli revanced-integrations);
 
     foreach my $repo (@repos) {
-        my $github_api_url = "https://api.github.com/repos/inotia00/$repo/releases/latest";
+        my $github_api_url = "https://api.github.com/repos/$user/$repo/releases/latest";
 
         my $content = req($github_api_url);
         my $release_data = decode_json($content);

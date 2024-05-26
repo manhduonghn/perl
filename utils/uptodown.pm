@@ -10,8 +10,28 @@ use HTTP::Request;
 use HTTP::Headers;
 use POSIX qw(strftime);
 use Exporter 'import';
+use Log::Log4perl;
 
 our @EXPORT_OK = qw(uptodown);
+
+# Initialize Log4perl
+Log::Log4perl->init(\<<'LOGCONF');
+log4perl.rootLogger = DEBUG, LOGFILE, SCREEN
+
+log4perl.appender.LOGFILE = Log::Log4perl::Appender::File
+log4perl.appender.LOGFILE.filename = uptodown.log
+log4perl.appender.LOGFILE.mode = append
+log4perl.appender.LOGFILE.layout = Log::Log4perl::Layout::PatternLayout
+log4perl.appender.LOGFILE.layout.ConversionPattern = %d %p %m %n
+
+log4perl.appender.SCREEN = Log::Log4perl::Appender::Screen
+log4perl.appender.SCREEN.stderr = 1
+log4perl.appender.SCREEN.layout = Log::Log4perl::Layout::PatternLayout
+log4perl.appender.SCREEN.layout.ConversionPattern = %d %p %m %n
+LOGCONF
+
+# Get the logger
+my $logger = Log::Log4perl->get_logger();
 
 sub req {
     my ($url, $output) = @_;
@@ -39,15 +59,19 @@ sub req {
         my $size = length($response->decoded_content);
         my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
         if ($output ne '-') {
-            open(my $fh, '>', $output) or die "Could not open file '$output' $!";
+            open(my $fh, '>', $output) or do {
+                $logger->error("Could not open file '$output': $!");
+                die "Could not open file '$output': $!";
+            };
             print $fh $response->decoded_content;
             close($fh);
-            print "$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]\n";
+            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            print "$timestamp URL:$final_url [$size/$size] -> \"-\" [1]\n";
+            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {
+        $logger->error("HTTP GET error: " . $response->status_line);
         die "HTTP GET error: " . $response->status_line;
     }
 }
@@ -89,7 +113,10 @@ sub get_supported_version {
     return unless defined $pkg_name;
     my $filename = 'patches.json';
     
-    open(my $fh, '<', $filename) or die "Could not open file '$filename' $!";
+    open(my $fh, '<', $filename) or do {
+        $logger->error("Could not open file '$filename': $!");
+        die "Could not open file '$filename': $!";
+    };
     local $/; 
     my $json_text = <$fh>;
     close($fh);
@@ -128,7 +155,11 @@ sub uptodown {
             $ENV{VERSION} = $version;
         } else {
             my $page = "https://$name.en.uptodown.com/android/versions";
-            my $page_content = req($page);
+            my $page_content = eval { req($page) };
+            if ($@) {
+                $logger->error("Failed to get page content: $@");
+                die "Failed to get page content: $@";
+            }
 
             my @lines = split /\n/, $page_content;
 
@@ -143,35 +174,12 @@ sub uptodown {
     }
 
     my $url = "https://$name.en.uptodown.com/android/versions";
-    my $download_page_content = req($url);
+    my $download_page_content = eval { req($url) };
+    if ($@) {
+        $logger->error("Failed to get download page content: $@");
+        die "Failed to get download page content: $@";
+    }
 
     my @lines = split /\n/, $download_page_content;
 
     filter_lines(qr/>\s*$version\s*<\/span>/, \@lines);
-    
-    my $download_page_url;
-    for my $line (@lines) {
-        if ($line =~ /.*data-url="(.*[^"]*)"/) {
-            $download_page_url = "$1";
-            $download_page_url =~ s/\/download\//\/post-download\//g;
-            last;
-        }
-    }
-
-    my $final_page_content = req($download_page_url);
-    
-    @lines = split /\n/, $final_page_content;
-    
-    my $final_url;
-    for my $line (@lines) {
-        if ($line =~ /.*"post-download" data-url="([^"]*)"/) {
-            $final_url = "https://dw.uptodown.com/dwn/$1";
-            last;
-        }
-    }
-    
-    my $apk_filename = "$name-v$version.apk";
-    req($final_url, $apk_filename);
-}
-
-1;

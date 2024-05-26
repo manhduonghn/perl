@@ -45,9 +45,9 @@ sub req {
             };
             print $fh $response->decoded_content;
             close($fh);
-            $logger->info("$URL:$final_url [$size/$size] -> \"$output\" [1]");
+            $logger->info("URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            $logger->info("$URL:$final_url [$size/$size] -> \"-\" [1]");
+            $logger->info("URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {

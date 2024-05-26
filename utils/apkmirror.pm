@@ -21,9 +21,17 @@ sub req {
     my ($url, $output) = @_;
     $output ||= '-';
 
+    # Tạo instance của HTTP::Cookies
+    my $cookie_jar = HTTP::Cookies->new(
+        file => "lwpcookies.txt",
+        autosave => 1,
+    );
+
+    # Tạo instance của LWP::UserAgent
     my $ua = LWP::UserAgent->new(
         agent => 'Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0',
         timeout => 30,
+        cookie_jar => $cookie_jar, # Thiết lập cookie_jar
     );
 
     my $headers = HTTP::Headers->new(

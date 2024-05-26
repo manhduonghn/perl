@@ -144,10 +144,6 @@ sub uptodown {
         } else {
             my $page = "https://$name.en.uptodown.com/android/versions";
             my $page_content = req($page);
-            if ($@) {
-                $logger->error("Failed to get page content: $@");
-                die "Failed to get page content: $@";
-            }
 
             my @lines = split /\n/, $page_content;
 
@@ -163,11 +159,34 @@ sub uptodown {
 
     my $url = "https://$name.en.uptodown.com/android/versions";
     my $download_page_content = req($url);
-    if ($@) {
-        $logger->error("Failed to get download page content: $@");
-        die "Failed to get download page content: $@";
-    }
 
     my @lines = split /\n/, $download_page_content;
 
     filter_lines(qr/>\s*$version\s*<\/span>/, \@lines);
+    
+    my $download_page_url;
+    for my $line (@lines) {
+        if ($line =~ /.*data-url="(.*[^"]*)"/) {
+            $download_page_url = "$1";
+            $download_page_url =~ s/\/download\//\/post-download\//g;
+            last;
+        }
+    }
+
+    my $final_page_content = req($download_page_url);
+    
+    @lines = split /\n/, $final_page_content;
+    
+    my $final_url;
+    for my $line (@lines) {
+        if ($line =~ /.*"post-download" data-url="([^"]*)"/) {
+            $final_url = "https://dw.uptodown.com/dwn/$1";
+            last;
+        }
+    }
+    
+    my $apk_filename = "$name-v$version.apk";
+    req($final_url, $apk_filename);
+}
+
+1;

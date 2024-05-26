@@ -7,6 +7,7 @@ use JSON;
 use Env;
 use Exporter 'import';
 use LWP::UserAgent;
+use HTTP::Cookies;
 use HTTP::Request;
 use HTTP::Headers;
 use Log::Log4perl;

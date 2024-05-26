@@ -11,7 +11,7 @@ use Log::Log4perl;
 use File::Spec;
 use FindBin;
 
-my $log_conf = "$FindBin::Bin/log.conf";
+my $log_conf = "$FindBin::Bin/log4perl.conf";
 Log::Log4perl::init($log_conf);
 my $logger = Log::Log4perl->get_logger();
 

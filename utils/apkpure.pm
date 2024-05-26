@@ -15,7 +15,7 @@ use File::Spec;
 
 our @EXPORT_OK = qw(apkpure);
 
-my $log_conf = "$FindBin::Bin/log4perl.conf";
+my $log_conf = "$FindBin::Bin/utils/log4perl.conf";
 Log::Log4perl::init($log_conf);
 my $logger = Log::Log4perl->get_logger();
 

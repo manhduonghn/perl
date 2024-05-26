@@ -6,6 +6,7 @@ use warnings;
 use JSON;
 use Env;
 use LWP::UserAgent;
+use HTTP::Cookies;
 use HTTP::Request;
 use HTTP::Headers;
 use Exporter 'import';
@@ -21,9 +22,15 @@ sub req {
     my ($url, $output) = @_;
     $output ||= '-';
 
+    my $cookie_jar = HTTP::Cookies->new(
+        file => "lwpcookies.txt",
+        autosave => 1,
+    );
+
     my $ua = LWP::UserAgent->new(
         agent => 'Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0',
         timeout => 30,
+        cookie_jar => $cookie_jar,
     );
 
     my $headers = HTTP::Headers->new(
@@ -40,7 +47,7 @@ sub req {
 
     if ($response->is_success) {
         my $size = length($response->decoded_content);
-        my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
+        my $final_url = $response->base;
         if ($output ne '-') {
             open(my $fh, '>', $output) or do {
                 $logger->error("Could not open file '$output': $!");

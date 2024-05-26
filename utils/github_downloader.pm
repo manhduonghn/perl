@@ -9,10 +9,15 @@ use LWP::UserAgent;
 use HTTP::Request;
 use Log::Log4perl;
 use File::Spec;
-use FindBin;
 
-my $log_conf = "$FindBin::Bin/utils/log4perl.conf";
-Log::Log4perl::init($log_conf);
+# Export the download_resources function
+our @EXPORT_OK = qw(download_resources);
+
+# Construct the path to the configuration file
+my $config_path = File::Spec->catfile('utils', 'log4perl.conf');
+
+# Initialize Log::Log4perl using the external configuration file
+Log::Log4perl->init($config_path);
 my $logger = Log::Log4perl->get_logger();
 
 # Subroutine to perform an HTTP GET request and handle the response

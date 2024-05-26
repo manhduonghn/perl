@@ -9,18 +9,13 @@ use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Headers;
 use Exporter 'import';
-use Log::Log4perl;
+use Log4perl;
 use FindBin;
 use File::Spec;
 
 our @EXPORT_OK = qw(uptodown);
 
-# Construct the path to the configuration file using FindBin
-my $log_config_path = File::Spec->catfile($FindBin::Bin, 'utils', 'log4perl.conf');
-
-# Initialize Log::Log4perl using the external configuration file
-Log::Log4perl->init($log_config_path);
-my $logger = Log::Log4perl->get_logger();
+my $logger = Log4perl::$logger;
 
 sub req {
     my ($url, $output) = @_;

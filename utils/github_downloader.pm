@@ -7,7 +7,6 @@ use JSON;
 use Exporter 'import';
 use LWP::UserAgent;
 use HTTP::Request;
-use POSIX qw(strftime);
 use Log::Log4perl;
 use File::Spec;
 
@@ -36,7 +35,6 @@ sub req {
     my $request = HTTP::Request->new(GET => $url);
     my $response = $ua->request($request);
 
-    my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
     if ($response->is_success) {
         my $size = length($response->decoded_content);
         my $final_url = $response->base;
@@ -47,9 +45,9 @@ sub req {
             };
             print $fh $response->decoded_content;
             close($fh);
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
+            $logger->info("$URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
+            $logger->info("$URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {

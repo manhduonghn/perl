@@ -8,7 +8,6 @@ use Env;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Headers;
-use POSIX qw(strftime);
 use Exporter 'import';
 use Log::Log4perl;
 use FindBin;
@@ -44,7 +43,6 @@ sub req {
     my $request = HTTP::Request->new(GET => $url, $headers);
     my $response = $ua->request($request);
 
-    my $timestamp = strftime("%Y-%m-%d %H:%M:%S", localtime);
     if ($response->is_success) {
         my $size = length($response->decoded_content);
         my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
@@ -55,9 +53,9 @@ sub req {
             };
             print $fh $response->decoded_content;
             close($fh);
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"$output\" [1]");
+            $logger->info("$URL:$final_url [$size/$size] -> \"$output\" [1]");
         } else {
-            $logger->info("$timestamp URL:$final_url [$size/$size] -> \"-\" [1]");
+            $logger->info("$URL:$final_url [$size/$size] -> \"-\" [1]");
         }
         return $response->decoded_content;
     } else {
@@ -113,12 +111,8 @@ sub apkpure {
             $ENV{VERSION} = $version;
         } else {
             my $page = "https://apkpure.net/$name/$package/versions";
-            my $page_content = eval { req($page) };
-            if ($@) {
-                $logger->error("Failed to get page content: $@");
-                die "Failed to get page content: $@";
-            }
-
+            my $page_content = req($page);
+        
             my @lines = split /\n/, $page_content;
 
             for my $line (@lines) {
@@ -131,11 +125,7 @@ sub apkpure {
     }
 
     my $url = "https://apkpure.net/$name/$package/download/$version";
-    my $download_page_content = eval { req($url) };
-    if ($@) {
-        $logger->error("Failed to get download page content: $@");
-        die "Failed to get download page content: $@";
-    }
+    my $download_page_content = req($url);
 
     my @lines = split /\n/, $download_page_content;
 
@@ -148,11 +138,7 @@ sub apkpure {
     }
 
     my $apk_filename = "$name-v$version.apk";
-    eval { req($download_url, $apk_filename) };
-    if ($@) {
-        $logger->error("Failed to download APK: $@");
-        die "Failed to download APK: $@";
-    }
+    req($download_url, $apk_filename);
 }
 
 1;

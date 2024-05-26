@@ -7,10 +7,13 @@ use JSON;
 use Exporter 'import';
 use LWP::UserAgent;
 use HTTP::Request;
-use Log4perl;
 use File::Spec;
+use FindBin; 
+use lib "$FindBin::Bin/utils";
+use Log4perl;
+
 my $logger = Log4perl::$logger;
-# Export the download_resources function
+
 our @EXPORT_OK = qw(download_resources);
 
 my $logger = Log4perl::$logger;

@@ -11,7 +11,7 @@ use apkmirror qw(apkmirror);
 use github_downloader qw(download_resources);
 
 # Download Github releases assets 
-download_resources();
+download_resources(revanced);
 
 # Apkmirror 
 apkmirror(

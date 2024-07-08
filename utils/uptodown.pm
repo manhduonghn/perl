@@ -131,6 +131,7 @@ sub uptodown {
     my ($name, $package) = @_;
 
     my $version = $ENV{VERSION};
+    my @versions;
 
     if (!$version) {
         if (my $supported_version = get_supported_version($package)) {

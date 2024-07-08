@@ -144,7 +144,7 @@ sub uptodown {
             my @lines = split /\n/, $page_content;
 
             for my $line (@lines) {
-                if ($line =~ /<span\s+class="version">(.*?)<\/span>/) {
+                if ($line =~ /.*class="version">(.*?)<\/span>/) {
                     push @versions, $1;
                 }
             }

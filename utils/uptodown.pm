@@ -144,10 +144,11 @@ sub uptodown {
 
             for my $line (@lines) {
                 if ($line =~ /.*class="version">(.*?)<\/span>/) {
-                    $version = "$2";
+                    $version = "$1";
                     last;
                 }
             }
+            $logger->info("Version: $version");
             $ENV{VERSION} = $version;
         }
     }

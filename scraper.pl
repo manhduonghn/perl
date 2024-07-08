@@ -39,20 +39,6 @@ apkmirror(
 );
 undef $ENV{VERSION};
 
-# Apkpure 
-apkpure(
-    "youtube",
-    "com.google.android.youtube"
-);
-undef $ENV{VERSION};
-
-# $ENV{VERSION} = "6.51.52";
-apkpure(
-    "youtube-music",
-    "com.google.android.apps.youtube.music"
-);
-undef $ENV{VERSION};
-
 # Uptodown
 uptodown(
     "youtube",

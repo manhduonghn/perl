@@ -144,12 +144,12 @@ sub uptodown {
             my @lines = split /\n/, $page_content;
 
             for my $line (@lines) {
-                if ($line =~ /.*class="version">(.*?)<\/span>/) {
-                    push @versions, $1;
+                if ($line =~ /<span class="version">([\d\.]+)<\/span>/) {
+                    push @versions, version->parse($1);
                 }
             }
 
-            $version = (sort {$b cmp $a} @versions)[0];
+            $version = (sort { $b <=> $a } @versions)[0];
             $ENV{VERSION} = $version;
         }
     }

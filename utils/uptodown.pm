@@ -149,10 +149,7 @@ sub uptodown {
                     push @versions, version->parse($1);
                 }
             }
-
-            $logger->info("Versions: @versions");
             $version = (sort { $b <=> $a } @versions)[0];
-            $logger->info("Highest version: $version");
             $ENV{VERSION} = $version;
         }
     }
@@ -173,11 +170,6 @@ sub uptodown {
         }
     }
 
-    if (!$download_page_url) {
-        $logger->error("No download page URL found for version $version");
-        die "No download page URL found for version $version";
-    }
-
     my $final_page_content = req($download_page_url);
 
     @lines = split /\n/, $final_page_content;
@@ -188,11 +180,6 @@ sub uptodown {
             $final_url = "https://dw.uptodown.com/dwn/$1";
             last;
         }
-    }
-
-    if (!$final_url) {
-        $logger->error("No final download URL found for version $version");
-        die "No final download URL found for version $version";
     }
 
     my $apk_filename = "$name-v$version.apk";

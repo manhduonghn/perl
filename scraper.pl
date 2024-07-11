@@ -13,40 +13,6 @@ use github_downloader qw(download_resources);
 # Download Github releases assets 
 download_resources("revanced");
 
-# Apkmirror 
-apkmirror(
-    "google-inc", 
-    "youtube", 
-    "com.google.android.youtube"
-);
-undef $ENV{VERSION};
-
-# $ENV{VERSION} = "6.51.52";
-apkmirror(
-    "google-inc", 
-    "youtube-music", 
-    "com.google.android.apps.youtube.music", 
-    "arm64-v8a"
-);
-undef $ENV{VERSION};
-
-$ENV{VERSION} = "457.1.0.45.109";
-apkmirror(
-    "facebook-2", 
-    "messenger",
-    "",
-    "arm64-v8a"
-);
-undef $ENV{VERSION};
-
-# Uptodown
-uptodown(
-    "youtube",
-    "com.google.android.youtube"
-);
-undef $ENV{VERSION};
-
-#$ENV{VERSION} = "6.51.52";
 uptodown(
     "youtube-music",
     "com.google.android.apps.youtube.music"

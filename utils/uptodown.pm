@@ -11,6 +11,7 @@ use HTTP::Headers;
 use Exporter 'import';
 use Log::Log4perl;
 use FindBin;
+use version;
 
 our @EXPORT_OK = qw(uptodown);
 
@@ -148,9 +149,10 @@ sub uptodown {
                     push @versions, version->parse($1);
                 }
             }
-            $logger->info("@versions")
+
+            $logger->info("Versions: @versions");
             $version = (sort { $b <=> $a } @versions)[0];
-            $logger->info("$version")
+            $logger->info("Highest version: $version");
             $ENV{VERSION} = $version;
         }
     }

@@ -163,7 +163,7 @@ sub uptodown {
     my @lines = split /\n/, $download_page_content;
 
     filter_lines(qr/>\s*$version\s*<\/span>/, \@lines);
-    
+
     my $download_page_url;
     for my $line (@lines) {
         if ($line =~ /.*data-url="(.*[^"]*)"/) {
@@ -173,10 +173,15 @@ sub uptodown {
         }
     }
 
+    if (!$download_page_url) {
+        $logger->error("No download page URL found for version $version");
+        die "No download page URL found for version $version";
+    }
+
     my $final_page_content = req($download_page_url);
-    
+
     @lines = split /\n/, $final_page_content;
-    
+
     my $final_url;
     for my $line (@lines) {
         if ($line =~ /.*"post-download" data-url="([^"]*)"/) {
@@ -184,7 +189,12 @@ sub uptodown {
             last;
         }
     }
-    
+
+    if (!$final_url) {
+        $logger->error("No final download URL found for version $version");
+        die "No final download URL found for version $version";
+    }
+
     my $apk_filename = "$name-v$version.apk";
     req($final_url, $apk_filename);
 }

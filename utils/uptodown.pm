@@ -148,8 +148,9 @@ sub uptodown {
                     push @versions, version->parse($1);
                 }
             }
-
+            $logger->info("@versions")
             $version = (sort { $b <=> $a } @versions)[0];
+            $logger->info("$version")
             $ENV{VERSION} = $version;
         }
     }

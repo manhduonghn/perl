@@ -14,7 +14,6 @@ use github_downloader qw(download_resources);
 # download_resources("revanced");
 
 uptodown(
-    "youtube-music",
-    "com.google.android.apps.youtube.music"
+    "youtube-music"
 );
 undef $ENV{VERSION};

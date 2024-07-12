@@ -41,8 +41,7 @@ undef $ENV{VERSION};
 
 # Apkpure 
 apkpure(
-    "youtube",
-    "com.google.android.youtube"
+    "youtube"
 );
 undef $ENV{VERSION};
 

@@ -11,29 +11,41 @@ use HTTP::Headers;
 use Exporter 'import';
 use Log::Log4perl;
 use FindBin;
+use File::Spec;
 
 our @EXPORT_OK = qw(apkpure);
 
-Log::Log4perl->init("$FindBin::Bin/utils/log4perl.conf");
+# Construct the path to the configuration file using FindBin
+my $log_config_path = File::Spec->catfile($FindBin::Bin, 'utils', 'log4perl.conf');
+
+# Initialize Log::Log4perl using the external configuration file
+Log::Log4perl->init($log_config_path);
 my $logger = Log::Log4perl->get_logger();
 
 sub req {
     my ($url, $output) = @_;
     $output ||= '-';
 
-    # Create a user agent object
     my $ua = LWP::UserAgent->new(
         agent => 'Mozilla/5.0 (Android 13; Mobile; rv:125.0) Gecko/125.0 Firefox/125.0',
         timeout => 30,
     );
 
-    # Create an HTTP GET request
-    my $request = HTTP::Request->new(GET => $url);
+    my $headers = HTTP::Headers->new(
+        'Content-Type' => 'application/octet-stream',
+        'Accept-Language' => 'en-US,en;q=0.9',
+        'Connection' => 'keep-alive',
+        'Upgrade-Insecure-Requests' => '1',
+        'Cache-Control' => 'max-age=0',
+        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
+    );
+
+    my $request = HTTP::Request->new(GET => $url, $headers);
     my $response = $ua->request($request);
 
     if ($response->is_success) {
         my $size = length($response->decoded_content);
-        my $final_url = $response->base;
+        my $final_url = $response->base; # Lấy URL phản hồi cuối cùng
         if ($output ne '-') {
             open(my $fh, '>', $output) or do {
                 $logger->error("Could not open file '$output': $!");
